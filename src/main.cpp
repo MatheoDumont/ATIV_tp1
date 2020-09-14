@@ -5,13 +5,15 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/video/background_segm.hpp>
 
+#include <iostream>
+
 /*
 * Partie 1 Tp 1 Appliquer convolution sur Image
 */
 
 int main()
 {
-    cv::Mat image = cv::imread(path);
+    cv::Mat image = cv::imread("../datas/square_sample.png");
 
     if (!image.data)
     {
