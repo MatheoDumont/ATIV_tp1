@@ -3,20 +3,26 @@ cmake_minimum_required(VERSION 3.1)
 
 project(tp1)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 find_package(OpenCV REQUIRED)
 # find_package(Threads REQUIRED)
 
 set(CMAKE_CXX_STANDARD 11)
 
+file(GLOB INCLUDES include/*.h)
+
+file(GLOB SOURCES src/*.cpp)
+
+
 include_directories(
   ${OpenCV_INCLUDE_DIRS}
-  include/
+  include/  
 )
 
 add_executable(
   ${CMAKE_PROJECT_NAME}
-  src/main.cpp
-#   src/analyse_image.cpp
+  ${SOURCES}
 )
 
 target_link_libraries(
