@@ -14,60 +14,59 @@
 
 int main()
 {
-    float f[3][3] = {1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f};
-    float gauche[3][3] = {1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f};
-    
-    cv::Mat filtre = cv::Mat(3, 3, CV_32F, &f);
-    // std::cout << filtre << std::endl;
-    std::vector<cv::Mat> filtres;
-    filtres.push_back(filtre);
+  float f[3][3] = {1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f};
+  float gauche[3][3] = {1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f};
 
-    // cv::Mat image = cv::imread("datas/square_sample.png", CV_LOAD_IMAGE_GRAYSCALE);
-    cv::Mat image = cv::imread("datas/square_sample.png");
+  cv::Mat filtre = cv::Mat(3, 3, CV_32F, &f);
+  // std::cout << filtre << std::endl;
+  std::vector<cv::Mat> filtres;
+  filtres.push_back(filtre);
 
-    cv::Mat gs; // for greyscale image
+  // cv::Mat image = cv::imread("datas/square_sample.png", CV_LOAD_IMAGE_GRAYSCALE);
+  cv::Mat image = cv::imread("datas/square_sample.png");
 
-    cv::cvtColor(image, gs, cv::COLOR_BGR2GRAY);
+  cv::Mat gs; // for greyscale image
 
-    std::cout << cv::typeToString(gs.type()) << std::endl;
-    std::cout << cv::typeToString(filtre.type()) << std::endl;
+  cv::cvtColor(image, gs, cv::COLOR_BGR2GRAY);
 
-    // return 0;
-    if (!image.data)
-    {
-        std::cerr << "Error : image or video not found" << std::endl;
-        exit(-1);
-    }
+  // std::cout << cv::typeToString(gs.type()) << std::endl;
+  // std::cout << cv::typeToString(filtre.type()) << std::endl;
 
-    cv::imshow("Image_from_path", image);
+  // return 0;
+  if (!image.data)
+  {
+    std::cerr << "Error : image or video not found" << std::endl;
+    exit(-1);
+  }
+
+  cv::imshow("Image_from_path", image);
+  cv::waitKey(0);
+
+  cv::imshow("greyscale", gs);
+  cv::waitKey(0);
+
+  // cv::Mat gs_float;
+  // gs.convertTo(gs_float, CV_32F);
+  cv::Mat convol = Kernel::conv2(gs, filtres)[0];
+
+  // cv::Mat convol_uchar;
+  // convol.convertTo(convol_uchar, CV_8UC1);
+  cv::imshow("convoluted", convol);
+  cv::waitKey(0);
+
+  { // gradient tests with amplitude and angle
+    std::vector<cv::Mat> gradient_filters;
+    cv::Mat grad0 = (cv::Mat_<float>(3, 3) << 1, 0, -1, 1, 0, -1, 1, 0, -1);
+    gradient_filters.push_back(grad0);
+    cv::Mat grad2 = (cv::Mat_<float>(3, 3) << -1, -1, -1, 0, 0, 0, 1, 1, 1);
+    gradient_filters.push_back(grad2);
+
+    std::vector<cv::Mat> gradient_convol = Kernel::conv2(gs, gradient_filters);
+    cv::imshow("amplitude_0 grad", Kernel::amplitude_0(gradient_convol));
+    cv::imshow("amplitude_1 grad", Kernel::amplitude_1(gradient_convol));
+    cv::imshow("amplitude_2 grad", Kernel::amplitude_2(gradient_convol));
     cv::waitKey(0);
+  }
 
-    cv::imshow("greyscale", gs);
-    cv::waitKey(0);
-
-    // cv::Mat gs_float;
-    // gs.convertTo(gs_float, CV_32F);
-    cv::Mat convol = Kernel::conv2(gs, filtres)[0];
-
-    // cv::Mat convol_uchar;
-    // convol.convertTo(convol_uchar, CV_8UC1);
-    cv::imshow("convoluted", convol);
-    cv::waitKey(0);
-
-    {// gradient tests with amplitude and angle
-      std::vector<cv::Mat> gradient_filters;
-      cv::Mat grad0 = (cv::Mat_<float>(3,3) << 1, 0, -1, 1, 0, -1, 1, 0, -1);
-      gradient_filters.push_back(grad0);
-      cv::Mat grad2 = (cv::Mat_<float>(3,3) << -1, -1, -1, 0, 0, 0, 1, 1, 1);
-      gradient_filters.push_back(grad2);
-      
-      std::vector<cv::Mat> gradient_convol = Kernel::conv2(gs, gradient_filters);
-      cv::imshow("amplitude_0 grad",  Kernel::amplitude_0(gradient_convol));
-      cv::imshow("amplitude_1 grad",  Kernel::amplitude_1(gradient_convol));
-      cv::imshow("amplitude_2 grad",  Kernel::amplitude_2(gradient_convol));
-      cv::waitKey(0);
-      
-    }
-
-    cv::destroyAllWindows();
+  cv::destroyAllWindows();
 }
