@@ -34,7 +34,7 @@ void Kernel::conv_pixel(cv::Mat &in, cv::Mat &out, int row, int col, cv::Mat fil
       // float coef_in = (float *)in.ptr(row + i, col + j);
 
       float coef_in = (float)(in.at<uchar>(cv::Point(row + i, col + j)));
-      float coef_filtre = (filtre.at<uchar>(cv::Point(i + 1, j + 1)));
+      float coef_filtre = (filtre.at<float>(cv::Point(i + 1, j + 1)));
       // float coef_filtre = ((const float *)irow_filtre)[j + 1];
       float coef_res = coef_in * coef_filtre;
 

@@ -14,8 +14,12 @@
 
 int main()
 {
-    float f[3][3] = {1/3.f, 0.f, -1/3.f, 1/3.f, 0.f, -1/3.f, 1/3.f, 0.f, -1/3.f};
+    float f[3][3] = {1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f};
+    float gauche[3][3] = {1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f, 1 / 9.f};
+    
     cv::Mat filtre = cv::Mat(3, 3, CV_32F, &f);
+
+    // std::cout << filtre << std::endl;
 
     std::vector<cv::Mat> filtres;
     filtres.push_back(filtre);
@@ -37,22 +41,21 @@ int main()
         exit(-1);
     }
 
-    // cv::imshow("Image_from_path", image);
-    // cv::waitKey(0);
+    cv::imshow("Image_from_path", image);
+    cv::waitKey(0);
 
-    // cv::imshow("greyscale", gs);
-    // cv::waitKey(0);
+    cv::imshow("greyscale", gs);
+    cv::waitKey(0);
 
     // cv::Mat gs_float;
     // gs.convertTo(gs_float, CV_32F);
     cv::Mat convol = Kernel::conv2(gs, filtres)[0];
 
     // cv::Mat convol_uchar;
-    // convol.convertTo(convol_uchar, 0);
+    // convol.convertTo(convol_uchar, CV_8UC1);
 
     cv::imshow("convoluted", convol);
     cv::waitKey(0);
-
 
     cv::destroyAllWindows();
 }
