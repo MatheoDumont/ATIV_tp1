@@ -69,43 +69,73 @@ std::vector<cv::Mat> Kernel::conv2(cv::Mat &image, std::vector<cv::Mat> filtres)
   return output;
 }
 
-// cv::saturate_cast<uchar> (double)
-
-cv::Mat amplitude_0(cv::Mat mx, cv::Mat my)
-{
-  assert(mx.rows == my.rows && my.cols == my.cols);
-  float sumx = 0.0;
-  float sumy = 0.0;
-  cv::Mat res = cv::Mat::zeros(mx.rows, mx.cols, CV_32F);
-  for (size_t row = 0; row < mx.rows; row++)
-  {
-    for (size_t col = 0; col < mx.cols; col++)
-    {
-      sumx = mx.at<float>(row, col);
-      sumy = my.at<float>(row, col);
-      res.at<float>(row, col) = 1 / (sqrt(2)) * sqrt(sumx * sumx + sumy * sumy);
+cv::Mat Kernel::amplitude_x(std::vector<cv::Mat> mi, float x) {
+  assert(mi.size() > 0);
+  float temporary = 0.0;
+  cv::Mat res = cv::Mat::zeros(mi[0].rows, mi[0].cols, CV_32F);
+  for (size_t row = 0 ; row < mi[0].rows; row++) {
+    for (size_t col = 0; col < mi[0].cols; col++) {
+      temporary = 0.0;
+      for (size_t i = 0 ; i<mi.size() ; i++) {
+        temporary += pow(abs(mi[i].at<float>(row, col)), x);
+      }
+      res.at<float>(row, col) = pow(1.0/mi.size()*temporary, 1/x);
     }
   }
   return res;
 }
 
-// cv::Mat amplitude_1(std::vector<cv::Mat> mi) {
-//   assert(mx.rows == my.rows && my.cols == my.cols);
-//   float temporary = 0.0;
-//   cv::Mat res = cv::Mat::zeros(mx.rows, mx.cols, CV_32F);
-//   for (size_t row = 0 ; row < mx.rows; row++) {
-//     for (size_t col = 0; col < mx.cols; col++) {
-//       for (size_t i ; i<mi.size() ; i++) { // loop in order to get the max
-//         temporary =  abs(mi[i].at<float>(row, col));
-//         if (res.at<float>(row, col) < temporary)
-//           res.at<float>(row, col) = temporary;
-//       }
-//     }
-//   }
-//   return res;
-// }
+cv::Mat Kernel::amplitude_0(std::vector<cv::Mat> mi) {
+  assert(mi.size() > 0);
+  float temporary = 0.0;
+  cv::Mat res = cv::Mat::zeros(mi[0].rows, mi[0].cols, CV_32F);
+  for (size_t row = 0 ; row < mi[0].rows; row++) {
+    for (size_t col = 0 ; col < mi[0].cols; col++) {
+      for (size_t i = 0 ; i<mi.size() ; i++) { // loop in order to get the max
+        temporary =  abs(mi[i].at<float>(row, col));
+        if (res.at<float>(row, col) < temporary) {
+          res.at<float>(row, col) = temporary;
+	}
+      }
+    }
+  }
+  return res;
+}
 
-cv::Mat angle_0(cv::Mat mx, cv::Mat my)
+cv::Mat Kernel::amplitude_1(std::vector<cv::Mat> mi) {
+  assert(mi.size() > 0);
+  // We could just call amplitude_x(mi, 1.0)
+  cv::Mat res = cv::Mat::zeros(mi[0].rows, mi[0].cols, CV_32F);
+  for (size_t row = 0 ; row < mi[0].rows; row++) {
+    for (size_t col = 0 ; col < mi[0].cols; col++) {
+      for (size_t i = 0 ; i<mi.size() ; i++) { // loop for adding the absolute values
+	 res.at<float>(row, col) += abs(mi[i].at<float>(row, col));
+      }
+      res.at<float>(row, col) = 1.0/(mi.size()) * res.at<float>(row, col);
+    }
+  }
+  return res;
+}
+
+cv::Mat Kernel::amplitude_2(std::vector<cv::Mat> mi) {
+  assert(mi.size() > 0);
+  // We could just call amplitude_x(mi, 2.0)
+  float temporary = 0.0;
+  cv::Mat res = cv::Mat::zeros(mi[0].rows, mi[0].cols, CV_32F);
+  for (size_t row = 0 ; row < mi[0].rows; row++) {
+    for (size_t col = 0; col < mi[0].cols; col++) {
+      temporary = 0.0;
+      for (size_t i = 0 ; i<mi.size() ; i++) { // loop in order to add the squares
+        temporary += mi[i].at<float>(row, col)*mi[i].at<float>(row, col);
+      }
+      res.at<float>(row, col) = sqrt( 1.0/mi.size()*temporary );
+    }
+  }
+  return res;
+}
+
+
+cv::Mat Kernel::angle(cv::Mat mx, cv::Mat my)
 {
   assert(mx.rows == my.rows && my.cols == my.cols);
   cv::Mat res = cv::Mat::zeros(mx.rows, mx.cols, CV_32F);
