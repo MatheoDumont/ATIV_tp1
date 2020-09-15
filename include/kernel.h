@@ -24,24 +24,39 @@ public:
     static std::vector<cv::Mat> conv2(cv::Mat &image, std::vector<cv::Mat> filtres);
 
     /*
-     * Compute amplitude of the gradient (mx,my) with the euclidean norm :
-     * sqrt(mx^2+my^2)/sqrt(2). We divide by sqrt(2) in order to have a result
-     * between 0 and 255.
+     * Compute amplitude of the multidirectional gradient mi =(m_0,m_1,...m_n)
+     * with the L_x norm : pow(1/n pow(|m_i|,x),1/x).
      */
-    static cv::Mat amplitude_0(cv::Mat mx, cv::Mat my);
+    static cv::Mat amplitude_x(std::vector<cv::Mat> mi, float x);
+    
+    /*
+     * Compute amplitude of the multidirectional gradient mi =(m_0,m_1,...m_n)
+     * with the L_0 norm : max_{0\leq i\leq n} |m_i|.
+     * Equivalent to `amplitude_x(mi, x->0.0)`.
+     */
+    static cv::Mat amplitude_0(std::vector<cv::Mat> mi);
 
     /*
      * Compute amplitude of the multidirectional gradient mi =(m_0,m_1,...m_n)
-     * with the L_0 norm :
-     * max_{0\leq i\leq n} |m_i|.
+     * with the L_1 norm : 1/n \sum_i |m_i|.
+     * Equivalent to `amplitude_x(mi, x=1.0)`.
      */
-    static cv::Mat amplitude_1(std::vector<cv::Mat> mi); // max |D_i|
+    static cv::Mat amplitude_1(std::vector<cv::Mat> mi);
+    
+    /*
+     * Compute amplitude of the multidirectional gradient mi =(m_0,m_1,...m_n)
+     * with the euclidean norm L_2 : sqrt(1/n \sum_i m_i^2)
+     * Equivalent to `amplitude_x(mi, x=2.0)`.
+     */
+    static cv::Mat amplitude_2(std::vector<cv::Mat> mi);
+
+    
 
     /*
      *  Compute angle of direction of the gradient (mx,my) with atan2
      * (of math.h).
      */
-    static cv::Mat angle_0(cv::Mat mx, cv::Mat my);
+    static cv::Mat angle(cv::Mat mx, cv::Mat my);
 };
 
 #endif
