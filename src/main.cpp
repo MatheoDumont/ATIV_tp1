@@ -8,6 +8,7 @@
 #include <iostream>
 #include "kernel.h"
 
+#define IMAGE_NAME "datas/square_sample.png"
 /*
 * Partie 1 Tp 1 Appliquer convolution sur Image
 */
@@ -23,7 +24,12 @@ int main()
   filtres.push_back(filtre);
 
   // cv::Mat image = cv::imread("datas/square_sample.png", CV_LOAD_IMAGE_GRAYSCALE);
-  cv::Mat image = cv::imread("datas/square_sample.png");
+  cv::Mat image = cv::imread(IMAGE_NAME);
+  if (!image.data)
+  {
+    std::cerr << "Error : image or video not found" << std::endl;
+    exit(-1);
+  }
 
   cv::Mat gs; // for greyscale image
 
@@ -31,13 +37,6 @@ int main()
 
   // std::cout << cv::typeToString(gs.type()) << std::endl;
   // std::cout << cv::typeToString(filtre.type()) << std::endl;
-
-  // return 0;
-  if (!image.data)
-  {
-    std::cerr << "Error : image or video not found" << std::endl;
-    exit(-1);
-  }
 
   cv::imshow("Image_from_path", image);
   cv::waitKey(0);
@@ -56,15 +55,21 @@ int main()
 
   { // gradient tests with amplitude and angle
     std::vector<cv::Mat> gradient_filters;
-    cv::Mat grad0 = (cv::Mat_<float>(3, 3) << 1, 0, -1, 1, 0, -1, 1, 0, -1);
+    cv::Mat grad0 = (cv::Mat_<float>(3, 3) << 1.0/3, 0, -1.0/3, 1.0/3, 0, -1.0/3, 1.0/3, 0, -1.0/3);
     gradient_filters.push_back(grad0);
-    cv::Mat grad2 = (cv::Mat_<float>(3, 3) << -1, -1, -1, 0, 0, 0, 1, 1, 1);
+    cv::Mat grad2 = (cv::Mat_<float>(3, 3) << -1.0/3, -1.0/3, -1.0/3, 0, 0, 0, 1.0/3, 1.0/3, 1.0/3);
     gradient_filters.push_back(grad2);
 
     std::vector<cv::Mat> gradient_convol = Kernel::conv2(gs, gradient_filters);
-    cv::imshow("amplitude_0 grad", Kernel::amplitude_0(gradient_convol));
-    cv::imshow("amplitude_1 grad", Kernel::amplitude_1(gradient_convol));
-    cv::imshow("amplitude_2 grad", Kernel::amplitude_2(gradient_convol));
+    cv::imshow("amplitude_0 grad", Kernel::amplitude_0(gradient_convol)*(1/255.0));
+    cv::imshow("amplitude_1 grad", Kernel::amplitude_1(gradient_convol)*(1/255.0));
+    cv::imshow("amplitude_2 grad", Kernel::amplitude_2(gradient_convol)*(1/255.0));
+    cv::waitKey(0);
+
+    cv::Mat gradient_color = Kernel::color_gradient_im(Kernel::amplitude_0(gradient_convol),
+						       Kernel::angle(gradient_convol[0],
+								     gradient_convol[1]));
+    cv::imshow("color gradient", gradient_color*(1/255.0));
     cv::waitKey(0);
   }
 

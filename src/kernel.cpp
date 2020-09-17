@@ -140,16 +140,72 @@ cv::Mat Kernel::amplitude_2(std::vector<cv::Mat> mi)
 }
 
 cv::Mat Kernel::angle(cv::Mat mx, cv::Mat my)
-{
+{// angle in [0, 2*M_PI]
   assert(mx.rows == my.rows && my.cols == my.cols);
   cv::Mat res = cv::Mat::zeros(mx.rows, mx.cols, CV_32F);
+  float temporary;
   for (size_t row = 0; row < mx.rows; row++)
   {
     for (size_t col = 0; col < mx.cols; col++)
     {
-      //   res.at<float>(row, col) = atan2( my.at<float>(row, col) / mx.at<float>(row, col) );
-      res.at<float>(row, col) = atan2(my.at<float>(row, col), mx.at<float>(row, col));
+      temporary = atan2(my.at<float>(row, col), mx.at<float>(row, col));
+      if (mx.at<float>(row, col) < 0)
+	temporary += M_PI;
+      if (temporary < 0)
+	temporary += 2*M_PI;
+      res.at<float>(row, col) = temporary;
     }
   }
   return res;
+}
+
+void HSVtoRGB(float H, float S,float V, cv::Vec3f& pixel){
+    if(H>360 || H<0 || S>255 || S<0 || V>255 || V<0){
+      std::cout<<"The given HSV values are not in valid range"<<std::endl;
+      return;
+    }
+    float s = S/255;
+    float v = V/255;
+    float C = s*v;
+    float X = C*(1-abs(fmod(H/60.0, 2)-1));
+    float m = v-C;
+    float r,g,b;
+    if(H >= 0 && H < 60){
+        r = C,g = X,b = 0;
+    }
+    else if(H >= 60 && H < 120){
+        r = X,g = C,b = 0;
+    }
+    else if(H >= 120 && H < 180){
+        r = 0,g = C,b = X;
+    }
+    else if(H >= 180 && H < 240){
+        r = 0,g = X,b = C;
+    }
+    else if(H >= 240 && H < 300){
+        r = X,g = 0,b = C;
+    }
+    else{
+        r = C,g = 0,b = X;
+    }
+    pixel[0] = (r+m)*255; // red
+    pixel[1] = (g+m)*255; // green
+    pixel[2] = (b+m)*255; // blue
+}
+
+cv::Mat Kernel::color_gradient_im(cv::Mat amp, cv::Mat ang)
+{
+  assert(amp.rows == ang.rows && amp.cols == ang.cols);
+  cv::Mat img=cv::Mat::zeros(amp.rows,amp.cols,CV_32FC3);
+  for (int row = 0; row < img.rows; row++)
+    {
+    for (int col = 0; col < img.cols; col++)
+      {
+	HSVtoRGB(ang.at<float>(row, col)*180.0/M_PI,
+		 amp.at<float>(row, col),
+		 amp.at<float>(row, col),
+		 img.at<cv::Vec3f>(row,col));
+      }
+    }
+  return img;
 }

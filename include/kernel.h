@@ -31,8 +31,8 @@ public:
     
     /*
      * Compute amplitude of the multidirectional gradient mi =(m_0,m_1,...m_n)
-     * with the L_0 norm : max_{0\leq i\leq n} |m_i|.
-     * Equivalent to `amplitude_x(mi, x->0.0)`.
+     * with the L_infinity norm : max_{0\leq i\leq n} |m_i|.
+     * Equivalent to `amplitude_x(mi, x->infinity)`.
      */
     static cv::Mat amplitude_0(std::vector<cv::Mat> mi);
 
@@ -57,6 +57,8 @@ public:
      * (of math.h).
      */
     static cv::Mat angle(cv::Mat mx, cv::Mat my);
+    
+    static cv::Mat color_gradient_im(cv::Mat amp, cv::Mat ang);
 };
-
+void HSVtoRGB(float H, float S,float V, cv::Vec3f& pixel);
 #endif
