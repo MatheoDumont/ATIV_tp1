@@ -38,3 +38,9 @@ configure_file(
 configure_file(
   datas/mr_piuel.jpeg ${CMAKE_CURRENT_BINARY_DIR}/datas/mr_piuel.jpeg COPYONLY
 )
+configure_file(
+  datas/Palpa1.jpg ${CMAKE_CURRENT_BINARY_DIR}/datas/Palpa1.jpg COPYONLY
+)
+configure_file(
+  datas/Palpa2.jpg ${CMAKE_CURRENT_BINARY_DIR}/datas/Palpa2.jpg COPYONLY
+)
