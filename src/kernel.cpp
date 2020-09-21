@@ -13,7 +13,8 @@
 #include <assert.h> /* assert */
 #include <cmath>    /* sqrt atan2 */
 
-void Kernel::conv_pixel(cv::Mat &in, cv::Mat &out, int row, int col, cv::Mat filtre)
+
+float Kernel::conv_pixel(cv::Mat &in, int row, int col, cv::Mat filtre)
 {
   // cv::cvtColor(image, cv::COLOR_BGR2GRAY);
   // on ne conv pas sur les bordures de l'image im
@@ -21,14 +22,15 @@ void Kernel::conv_pixel(cv::Mat &in, cv::Mat &out, int row, int col, cv::Mat fil
 
   // filtre carre
   int step = floor(filtre.rows / 2);
-
+  float output = 0.f;
   for (int i = -step; i < step + 1; i++)
   {
     for (int j = -step; j < step + 1; j++)
     {
       // float coef_in = (float)(in.at<uchar>(cv::Point(row + i, col + j)));
       // float coef_filtre = (filtre.at<float>(cv::Point(i + 1, j + 1)));
-      out.at<float>(row, col) += (float)(in.at<uchar>(row + i, col + j)) * filtre.at<float>(i + 1, j + 1);
+      // out.at<float>(row, col) += (float)(in.at<uchar>(row + i, col + j)) * filtre.at<float>(i + 1, j + 1);
+      output += (float)(in.at<uchar>(row + i, col + j)) * filtre.at<float>(i + 1, j + 1);
     }
   }
 }
@@ -50,7 +52,7 @@ std::vector<cv::Mat> Kernel::conv2(cv::Mat &image, std::vector<cv::Mat> filtres)
     {
       for (int f = 0; f < filtres.size(); f++)
       {
-        conv_pixel(image, output[f], row, col, filtres[f]);
+        output[f].at<float>(row, col) = conv_pixel(image, row, col, filtres[f]);
       }
     }
   }
@@ -139,7 +141,40 @@ cv::Mat Kernel::amplitude_2(std::vector<cv::Mat> mi)
   return res;
 }
 
-cv::Mat Kernel::angle(cv::Mat mx, cv::Mat my)
+
+cv::Mat Kernel::angle(std::vector<cv::Mat> mi)
+{
+	assert(mi.size() > 0);
+	size_t i, imax;
+	size_t n = mi.size();
+	float maxi = 0.0;
+	float temp = 0.0;
+	cv::Mat res = cv::Mat::zeros(mi[0].rows, mi[0].cols, CV_32F);
+  for (size_t row = 0; row < mi[0].rows; row++)
+  {
+    for (size_t col = 0; col < mi[0].cols; col++)
+    {
+			maxi = 0.0;
+			imax = 0;
+      for (i = 0; i < n; i++)
+      { // to find the gradient that has the maximum absolute value
+				temp = abs(mi[i].at<float>(row, col));
+        if (temp > maxi)
+				{
+					imax = i;
+					maxi = temp;
+				}
+      }
+			if (mi[imax].at<float>(row, col) < 0.0) // gradient in opposite direction
+      	res.at<float>(row, col) = 1.0 * (imax + n);
+			else // classical gradient directions
+      	res.at<float>(row, col) = 1.0 * imax;
+    }
+  }
+  return res;
+}
+
+cv::Mat Kernel::angle_arctan(cv::Mat mx, cv::Mat my)
 {// angle in [0, 2*M_PI]
   assert(mx.rows == my.rows && my.cols == my.cols);
   cv::Mat res = cv::Mat::zeros(mx.rows, mx.cols, CV_32F);
@@ -149,10 +184,10 @@ cv::Mat Kernel::angle(cv::Mat mx, cv::Mat my)
     for (size_t col = 0; col < mx.cols; col++)
     {
       temporary = atan2(my.at<float>(row, col), mx.at<float>(row, col));
-      if (mx.at<float>(row, col) < 0)
-	temporary += M_PI;
-      if (temporary < 0)
-	temporary += 2*M_PI;
+      if (mx.at<float>(row, col) < 0)// in order to have the right angle
+	      temporary += M_PI;// not only in [-pi/2, pi/2]
+      if (temporary < 0) // in order to have the same angle but in [0,2pi]
+				temporary += 2*M_PI;
       res.at<float>(row, col) = temporary;
     }
   }
