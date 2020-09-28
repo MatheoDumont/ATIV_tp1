@@ -10,7 +10,7 @@
 #include <math.h>
 #include "seuil.h"
 
-#define IMAGE_NAME "datas/square_sample.png"
+#define IMAGE_NAME "datas/Palpa2.jpg"
 /*
 * Partie 1 Tp 1 Appliquer convolution sur Image
 */
@@ -32,27 +32,27 @@ int main()
     exit(-1);
   }
 
-  cv::Mat gs; // for greyscale image
+  cv::Mat im,gs; // for greyscale image
 
-  cv::cvtColor(image, gs, cv::COLOR_BGR2GRAY);
+  cv::cvtColor(image, im, cv::COLOR_BGR2GRAY);
 
   // std::cout << cv::typeToString(gs.type()) << std::endl;
   // std::cout << cv::typeToString(filtre.type()) << std::endl;
 
-  cv::imshow("Image_from_path", image);
-  cv::waitKey(0);
-
-  cv::imshow("greyscale", gs);
-  cv::waitKey(0);
-
-  // cv::Mat gs_float;
-  // gs.convertTo(gs_float, CV_32F);
-  cv::Mat convol = Kernel::conv2(gs, filtres)[0];
-
-  // cv::Mat convol_uchar;
+  // cv::imshow("Image_from_path", image);
+  // cv::waitKey(0);
+  //
+  // cv::imshow("greyscale", gs);
+  // cv::waitKey(0);
+  //
+  // // cv::Mat gs_float;
+  im.convertTo(gs, CV_32F);
+  // cv::Mat convol = Kernel::conv2(gs, filtres)[0];
+  //
+  // // cv::Mat convol_uchar;
   // convol.convertTo(convol_uchar, CV_8UC1);
-  cv::imshow("convoluted", convol);
-  cv::waitKey(0);
+  // cv::imshow("convoluted", convol);
+  // cv::waitKey(0);
 
   // { // gradient tests with amplitude and angle
   //   std::vector<cv::Mat> gradient_filters;
@@ -68,8 +68,8 @@ int main()
   //   cv::waitKey(0);
   //
   //   cv::Mat gradient_color = Kernel::color_gradient_im(Kernel::amplitude_0(gradient_convol),
-	// 					       Kernel::angle_arctan(gradient_convol[0],
-	// 							     gradient_convol[1]));
+  // 					       Kernel::angle_arctan(gradient_convol[0],
+  // 							     gradient_convol[1]));
   //   cv::imshow("color gradient", gradient_color*(1/255.0));
   //   cv::waitKey(0);
   // }
@@ -77,29 +77,40 @@ int main()
   {
     // gradients 4 directions
     std::vector<cv::Mat> gradient_filters;
-    cv::Mat gauche = (cv::Mat_<float>(3, 3) << 1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f);
-    cv::Mat droite = (cv::Mat_<float>(3, 3) << -1 / 3.f, 0.f, 1 / 3.f, -1 / 3.f, 0.f, 1 / 3.f, -1 / 3.f, 0.f, 1 / 3.f);
-    cv::Mat quart_plus = (cv::Mat_<float>(3, 3) << 1.f/ 3.f, 1.f/ 3.f, 0.f, 1.f/ 3.f, 0.f, -1.f / 3.f, 0.f, -1.f/ 3.f ,-1.f/ 3.f);
-    cv::Mat quart_moins = (cv::Mat_<float>(3, 3) << 0.f, 1.f/ 3.f, 1.f/ 3.f, -1.f/ 3.f, 0.f, 1.f/ 3.f, -1.f/ 3.f, -1.f/ 3.f, 0.f);
+    cv::Mat horizontal = (cv::Mat_<float>(3, 3) << 1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f);
+    cv::Mat vertical = (cv::Mat_<float>(3, 3) << -1 / 3.f, -1 / 3.f, -1 / 3.f, 0.f, 0.f, 0.f, 1 / 3.f, 1 / 3.f, 1 / 3.f);
+    cv::Mat quart_plus = (cv::Mat_<float>(3, 3) << 1.f / 3.f, 1.f / 3.f, 0.f, 1.f / 3.f, 0.f, -1.f / 3.f, 0.f, -1.f / 3.f, -1.f / 3.f);
+    cv::Mat quart_moins = (cv::Mat_<float>(3, 3) << 0.f, 1.f / 3.f, 1.f / 3.f, -1.f / 3.f, 0.f, 1.f / 3.f, -1.f / 3.f, -1.f / 3.f, 0.f);
 
-    gradient_filters.push_back(gauche);
-    gradient_filters.push_back(droite);
+    gradient_filters.push_back(horizontal);
+    gradient_filters.push_back(vertical);
     gradient_filters.push_back(quart_plus);
     gradient_filters.push_back(quart_moins);
 
     std::vector<cv::Mat> gradient_convol = Kernel::conv2(gs, gradient_filters);
 
     cv::Mat gradient_color = Kernel::color_gradient_im(
-                      Kernel::amplitude_0(gradient_convol),
-						          Kernel::angle(gradient_convol) * (M_PI/4)
-    );
-    cv::imshow("color gradient", gradient_color*(1/255.0));
+        Kernel::amplitude_0(gradient_convol),
+        Kernel::angle(gradient_convol) * (M_PI / 4));
+    cv::imshow("color gradient", gradient_color * (1 / 255.0));
     cv::waitKey(0);
 
     // TEST SEUIL GLOBAL
-    cv::imshow("seuillage global 4 directions", Seuil::seuil_global(Kernel::amplitude_0(gradient_convol)));
+    cv::imshow("seuillage global 4 directions - 0.05", Seuil::seuil_global(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.05));
+    cv::imshow("seuillage global 4 directions - 0.1", Seuil::seuil_global(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.1));
+    cv::imshow("seuillage global 4 directions - 0.15", Seuil::seuil_global(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.15));
     cv::waitKey(0);
 
+		// TEST SEUIL LOCAL
+    cv::imshow("seuillage local 4 directions", Seuil::seuil_local(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 7, 1.2));
+    cv::waitKey(0);
+
+
+		// TEST SEUIL HYSTERESIS
+    cv::imshow("seuillage hysteresis 4 directions 0.07-0.16 - rad1", Seuil::seuil_hysteresis(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.07, 0.16,1));
+    cv::imshow("seuillage hysteresis 4 directions 0.07-0.16 - rad3", Seuil::seuil_hysteresis(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.07, 0.16,3));
+    cv::imshow("seuillage hysteresis 4 directions 0.07-0.16 - rad5", Seuil::seuil_hysteresis(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.07, 0.16,5));
+    cv::waitKey(0);
   }
 
   cv::destroyAllWindows();

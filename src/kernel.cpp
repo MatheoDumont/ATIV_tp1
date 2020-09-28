@@ -30,7 +30,7 @@ float Kernel::conv_pixel(cv::Mat &in, int row, int col, cv::Mat filtre)
       // float coef_in = (float)(in.at<uchar>(cv::Point(row + i, col + j)));
       // float coef_filtre = (filtre.at<float>(cv::Point(i + 1, j + 1)));
       // out.at<float>(row, col) += (float)(in.at<uchar>(row + i, col + j)) * filtre.at<float>(i + 1, j + 1);
-      output += (float)(in.at<uchar>(row + i, col + j)) * filtre.at<float>(i + 1, j + 1);
+      output += (float)(in.at<float>(row + i, col + j)) * filtre.at<float>(i + 1, j + 1);
     }
   }
 }

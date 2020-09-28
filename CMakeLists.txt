@@ -18,7 +18,7 @@ file(GLOB SOURCES src/*.cpp)
 
 include_directories(
   ${OpenCV_INCLUDE_DIRS}
-  include/  
+  include/
 )
 
 add_executable(
