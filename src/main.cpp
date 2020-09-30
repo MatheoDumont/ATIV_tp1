@@ -9,8 +9,12 @@
 #include "kernel.h"
 #include <math.h>
 #include "seuil.h"
+#include "path_contour.h"
 
-#define IMAGE_NAME "datas/Palpa2.jpg"
+#define IMAGE_NAME0 "datas/square_sample.png"
+#define IMAGE_NAME1 "datas/Palpa1.jpg"
+#define IMAGE_NAME2 "datas/Palpa2.jpg"
+#define IMAGE_NAME3 "datas/mr_piuel.jpeg"
 /*
 * Partie 1 Tp 1 Appliquer convolution sur Image
 */
@@ -25,7 +29,7 @@ int main()
   filtres.push_back(filtre);
 
   // cv::Mat image = cv::imread("datas/square_sample.png", CV_LOAD_IMAGE_GRAYSCALE);
-  cv::Mat image = cv::imread(IMAGE_NAME);
+  cv::Mat image = cv::imread(IMAGE_NAME1);
   if (!image.data)
   {
     std::cerr << "Error : image or video not found" << std::endl;
@@ -88,28 +92,36 @@ int main()
     gradient_filters.push_back(quart_moins);
 
     std::vector<cv::Mat> gradient_convol = Kernel::conv2(gs, gradient_filters);
-
+		cv::Mat amp0 = Kernel::amplitude_0(gradient_convol);
     cv::Mat gradient_color = Kernel::color_gradient_im(
-        Kernel::amplitude_0(gradient_convol),
-        Kernel::angle(gradient_convol) * (M_PI / 4));
+        amp0, Kernel::angle(gradient_convol) * (M_PI / 4));
     cv::imshow("color gradient", gradient_color * (1 / 255.0));
     cv::waitKey(0);
 
     // TEST SEUIL GLOBAL
-    cv::imshow("seuillage global 4 directions - 0.05", Seuil::seuil_global(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.05));
-    cv::imshow("seuillage global 4 directions - 0.1", Seuil::seuil_global(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.1));
-    cv::imshow("seuillage global 4 directions - 0.15", Seuil::seuil_global(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.15));
+    cv::imshow("seuillage global 4 directions - 0.025", Seuil::seuil_global(amp0 * (1 / 255.0), 0.025));
+    cv::imshow("seuillage global 4 directions - 0.05", Seuil::seuil_global(amp0 * (1 / 255.0), 0.05));
+    cv::imshow("seuillage global 4 directions - 0.1", Seuil::seuil_global(amp0 * (1 / 255.0), 0.1));
     cv::waitKey(0);
 
 		// TEST SEUIL LOCAL
-    cv::imshow("seuillage local 4 directions", Seuil::seuil_local(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 7, 1.2));
+    /*
+		cv::imshow("seuillage local 4 directions", Seuil::seuil_local(amp0 * (1 / 255.0), 7, 1.2));
     cv::waitKey(0);
-
+		*/
 
 		// TEST SEUIL HYSTERESIS
-    cv::imshow("seuillage hysteresis 4 directions 0.07-0.16 - rad1", Seuil::seuil_hysteresis(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.07, 0.16,1));
-    cv::imshow("seuillage hysteresis 4 directions 0.07-0.16 - rad3", Seuil::seuil_hysteresis(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.07, 0.16,3));
-    cv::imshow("seuillage hysteresis 4 directions 0.07-0.16 - rad5", Seuil::seuil_hysteresis(Kernel::amplitude_0(gradient_convol)* (1 / 255.0), 0.07, 0.16,5));
+		/*
+    cv::imshow("seuillage hysteresis 4 directions 0.07-0.16 - rad1", Seuil::seuil_hysteresis(amp0 * (1 / 255.0), 0.07, 0.16,1));
+    cv::imshow("seuillage hysteresis 4 directions 0.07-0.16 - rad3", Seuil::seuil_hysteresis(amp0 * (1 / 255.0), 0.07, 0.16,3));
+    cv::imshow("seuillage hysteresis 4 directions 0.07-0.16 - rad5", Seuil::seuil_hysteresis(amp0 * (1 / 255.0), 0.07, 0.16,5));
+    cv::waitKey(0);
+		*/
+
+		// TEST SEUIL PATH_CONTOUR
+    cv::imshow("seuillage path 4 directions 0.025-0.05 - rad1", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.05));
+    cv::imshow("seuillage path 4 directions 0.025-0.08 - rad3", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.08));
+    cv::imshow("seuillage path 4 directions 0.025-0.11 - rad5", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.11));
     cv::waitKey(0);
   }
 
