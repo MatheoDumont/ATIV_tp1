@@ -10,6 +10,7 @@
 #include <math.h>
 #include "seuil.h"
 #include "path_contour.h"
+#include "contour.h"
 
 #define IMAGE_NAME0 "datas/square_sample.png"
 #define IMAGE_NAME1 "datas/Palpa1.jpg"
@@ -29,7 +30,7 @@ int main()
   filtres.push_back(filtre);
 
   // cv::Mat image = cv::imread("datas/square_sample.png", CV_LOAD_IMAGE_GRAYSCALE);
-  cv::Mat image = cv::imread(IMAGE_NAME1);
+  cv::Mat image = cv::imread(IMAGE_NAME3);
   if (!image.data)
   {
     std::cerr << "Error : image or video not found" << std::endl;
@@ -93,8 +94,9 @@ int main()
 
     std::vector<cv::Mat> gradient_convol = Kernel::conv2(gs, gradient_filters);
 		cv::Mat amp0 = Kernel::amplitude_0(gradient_convol);
-    cv::Mat gradient_color = Kernel::color_gradient_im(
-        amp0, Kernel::angle(gradient_convol) * (M_PI / 4));
+    cv::Mat dir = Kernel::angle(gradient_convol);
+    cv::Mat gradient_color = Kernel::color_gradient_im(amp0, dir * (M_PI / 4));
+
     cv::imshow("color gradient", gradient_color * (1 / 255.0));
     cv::waitKey(0);
 
@@ -111,6 +113,7 @@ int main()
 		*/
 
 		// TEST SEUIL HYSTERESIS
+
 		/*
     cv::imshow("seuillage hysteresis 4 directions 0.07-0.16 - rad1", Seuil::seuil_hysteresis(amp0 * (1 / 255.0), 0.07, 0.16,1));
     cv::imshow("seuillage hysteresis 4 directions 0.07-0.16 - rad3", Seuil::seuil_hysteresis(amp0 * (1 / 255.0), 0.07, 0.16,3));
@@ -119,10 +122,38 @@ int main()
 		*/
 
 		// TEST SEUIL PATH_CONTOUR
-    cv::imshow("seuillage path 4 directions 0.025-0.05 - rad1", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.05));
-    cv::imshow("seuillage path 4 directions 0.025-0.08 - rad3", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.08));
-    cv::imshow("seuillage path 4 directions 0.025-0.11 - rad5", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.11));
-    cv::waitKey(0);
+    // cv::imshow("seuillage path 4 directions 0.025-0.05 - rad1", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.05));
+    // cv::imshow("seuillage path 4 directions 0.025-0.08 - rad3", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.08));
+    // cv::imshow("seuillage path 4 directions 0.025-0.11 - rad5", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.11));
+    // cv::waitKey(0);
+
+    // TEST AFFINAGE CONTOUR SIMPLE
+    cv::Mat seuille = Seuil::seuil_hysteresis(amp0 * (1 / 255.0), 0.07, 0.16,5);
+    // cv::imshow("Affinage contour simple", Contour::affinage_max_loc(seuille, dir, amp0) * (1/255.0));
+    // cv::waitKey(0);
+
+		// TEST FERMETURE DES contours
+		std::vector<std::pair<int, int>> mask0{{1, -1}, {1, 0}, {1, 1},
+																					 {0, -1}, {0, 0}, {0, 1},
+																				 	 {-1,-1}, {-1,0}, {-1,1}};
+ 		std::vector<std::pair<int, int>> mask1 {
+				  	{2, -1},{2, 0},{2, 1},
+		{1, -2},{1, -1},{1, 0},{1, 1},{1, 2},
+ 		{0, -2},{0, -1},{0, 0},{0, 1},{0, 2},
+ 		{-1,-2},{-1,-1},{-1,0},{-1,1},{-1,2},
+					 	{-2,-1},{-2,0},{-2,1}
+		};
+		cv::imshow("Fermeture dil_ero iter=1 mask0", Contour::fermeture_dil_ero(seuille, mask0,1));
+		cv::imshow("Fermeture dil_dil iter=1 mask0", Contour::fermeture_dil_dil(seuille, mask0,1));
+		cv::imshow("Fermeture dil_ero iter=1 mask1", Contour::fermeture_dil_ero(seuille, mask1,1));
+		cv::imshow("Fermeture dil_dil iter=1 mask1", Contour::fermeture_dil_dil(seuille, mask1,1));
+		cv::waitKey(0);
+
+		cv::imshow("Fermeture dil_ero iter=5 mask0", Contour::fermeture_dil_ero(seuille, mask0,5));
+		cv::imshow("Fermeture dil_dil iter=5 mask0", Contour::fermeture_dil_dil(seuille, mask0,5));
+		cv::imshow("Fermeture dil_ero iter=5 mask1", Contour::fermeture_dil_ero(seuille, mask1,5));
+		cv::imshow("Fermeture dil_dil iter=5 mask1", Contour::fermeture_dil_dil(seuille, mask1,5));
+		cv::waitKey(0);
   }
 
   cv::destroyAllWindows();

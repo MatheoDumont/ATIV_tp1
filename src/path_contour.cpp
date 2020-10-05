@@ -4,33 +4,9 @@
  */
 
 #include "path_contour.h"
+#include "kernel.h"
 #define NOT01(x) ((x)>0.25 && (x)<0.75)
 
-
-int Path::direction_from_vec(int row, int col)
-{
-		// be careful : we use visual angles :
-		/*  3	2	1
-				4	x	0
-				5	6	7 */
-	if (row == 0 && col >  0)
-		return 0;
-	if (row >  0 && col >  0)
-		return 1;
-	if (row >  0 && col == 0)
-		return 2;
-	if (row >  0 && col <  0)
-		return 3;
-	if (row == 0 && col <  0)
-		return 4;
-	if (row <  0 && col <  0)
-		return 5;
-	if (row <  0 && col == 0)
-		return 6;
-	if (row <  0 && col >  0)
-		return 7;
-	return -1; // case (0,0)
-}
 
 std::vector<std::pair<int, int>> Path::direction_neighbours(int rows,
 	int cols, int row, int col, int d)
@@ -195,7 +171,7 @@ void Path::path_from_pix(cv::Mat amp, int row, int col, int direction,
 		 	for (size_t j = 0; j < highs.size(); j++)
 		 	{
 				Path::path_from_pix(amp, highs[j].first, highs[j].second,
-		 			Path::direction_from_vec(highs[j].first-row, highs[j].second-col),
+		 			Kernel::direction_from_vec(highs[j].first-row, highs[j].second-col),
 					contour, seuil_low, seuil_high);
 
 				// recursive calls on highs
@@ -205,7 +181,7 @@ void Path::path_from_pix(cv::Mat amp, int row, int col, int direction,
 	 {
 		 contour.at<float>(argmax.first, argmax.second)=1.f;
 		 Path::path_from_pix(amp, argmax.first, argmax.second,
-			 Path::direction_from_vec(argmax.first-row, argmax.second-col),
+			 Kernel::direction_from_vec(argmax.first-row, argmax.second-col),
 			 contour, seuil_low, seuil_high);
 	 }
 	 // otherwise : end of the contour

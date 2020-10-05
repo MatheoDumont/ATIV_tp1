@@ -10,6 +10,24 @@ private:
     ~Kernel();
 
 public:
+		/*
+		 * Return the direction angle in [0,7] (and -1 if row=col=0) of the vector
+		 * (row,col).
+				3	2	1
+				4	x	0
+				5	6	7
+		 */
+		static int direction_from_vec(int row, int col);
+
+		/*
+		 * Return the direction angle in [0,7] (and -1 if row=col=0) of the vector
+		 * (row,col).
+				3	2	1
+				4	x	0
+				5	6	7
+		 */
+		static std::pair<int,int> vec_from_direction(int dir);
+
     /*
      * Compute convolution on the image `in` with the filter `filtre` at the pixel (row, col)
      * and store the output in `out`.

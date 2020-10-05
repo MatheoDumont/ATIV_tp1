@@ -16,16 +16,6 @@ class Path
 
 	public:
 		/*
-     * Return the direction angle in [0,7] (and -1 if row=col=0) of the vector
-		 * (row,col).
-		 		3	2	1
- 				4	x	0
- 				5	6	7
-     */
-		static int direction_from_vec(int row, int col);
-
-
-		/*
      * Return the vector of the neighboured position of (row,col) in
 		 * direction d, taking into account the borders.
      */

@@ -14,6 +14,64 @@
 #include <cmath>    /* sqrt atan2 */
 
 
+int Kernel::direction_from_vec(int row, int col)
+{
+		// be careful : we use visual angles :
+		/*  3	2	1
+				4	x	0
+				5	6	7 */
+	if (row == 0 && col >  0)
+		return 0;
+	if (row >  0 && col >  0)
+		return 1;
+	if (row >  0 && col == 0)
+		return 2;
+	if (row >  0 && col <  0)
+		return 3;
+	if (row == 0 && col <  0)
+		return 4;
+	if (row <  0 && col <  0)
+		return 5;
+	if (row <  0 && col == 0)
+		return 6;
+	if (row <  0 && col >  0)
+		return 7;
+	return -1; // case (0,0)
+}
+
+std::pair<int,int> Kernel::vec_from_direction(int dir)
+{
+	switch (dir) {
+		case 0:
+			return {0,1};
+		break;
+		case 1:
+			return {1,1};
+		break;
+		case 2:
+			return {1,0};
+		break;
+		case 3:
+			return {1,-1};
+		break;
+		case 4:
+			return {0,-1};
+		break;
+		case 5:
+			return {-1,-1};
+		break;
+		case 6:
+			return {-1,0};
+		break;
+		case 7:
+			return {-1,1};
+		break;
+		default:
+			return {0,0};
+		break;
+	}
+}
+
 float Kernel::conv_pixel(cv::Mat &in, int row, int col, cv::Mat filtre)
 {
   // cv::cvtColor(image, cv::COLOR_BGR2GRAY);
@@ -30,9 +88,10 @@ float Kernel::conv_pixel(cv::Mat &in, int row, int col, cv::Mat filtre)
       // float coef_in = (float)(in.at<uchar>(cv::Point(row + i, col + j)));
       // float coef_filtre = (filtre.at<float>(cv::Point(i + 1, j + 1)));
       // out.at<float>(row, col) += (float)(in.at<uchar>(row + i, col + j)) * filtre.at<float>(i + 1, j + 1);
-      output += (float)(in.at<float>(row + i, col + j)) * filtre.at<float>(i + 1, j + 1);
+      output += in.at<float>(row + i, col + j) * filtre.at<float>(i + 1, j + 1);
     }
   }
+  return output;
 }
 
 std::vector<cv::Mat> Kernel::conv2(cv::Mat &image, std::vector<cv::Mat> filtres)
