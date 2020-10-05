@@ -7,8 +7,11 @@
 cv::Mat Contour::affinage_max_loc(cv::Mat in, cv::Mat pente, cv::Mat gradients) {
   cv::Mat out = cv::Mat::zeros(in.rows, in.cols, CV_32F);
 
-  for (int row = 0; row < in.rows; row++) {
-    for (int col = 0; col < in.cols; col++) {
+  for (int row = 1; row < in.rows-1; row++) {
+    for (int col = 1; col < in.cols-1; col++) {
+
+      if (in.at<float>(row, col) < 0.5f)
+        continue;
       int steep =  (int)pente.at<float>(row, col);
       int inv_steep = (steep + 4) % 8;
 
@@ -19,10 +22,11 @@ cv::Mat Contour::affinage_max_loc(cv::Mat in, cv::Mat pente, cv::Mat gradients) 
       p_inv_steep = {p_inv_steep.first + row, p_inv_steep.second + col};
 
       // 0 pixel dir grad, 1 pixel central, 2 pixel dir inv grad
+
       float val[3] = {
-        gradients.at<float>(p_steep.first, p_steep.second),
-        gradients.at<float>(row, col),
-        gradients.at<float>(p_inv_steep.first, p_inv_steep.second)
+        abs(gradients.at<float>(p_steep.first, p_steep.second)),
+        abs(gradients.at<float>(row, col)),
+        abs(gradients.at<float>(p_inv_steep.first, p_inv_steep.second))
       };
 
       // pour simplifier
@@ -46,26 +50,44 @@ cv::Mat Contour::affinage_max_loc(cv::Mat in, cv::Mat pente, cv::Mat gradients) 
 }
 
 
+
 cv::Mat Contour::fermeture_dil_ero(cv::Mat in,
-	std::vector<std::pair<int, int>> mask, int nb_iteration){
-		cv::Mat out = cv::Mat::zeros(in.rows, in.cols, CV_32F);
-		for (size_t i = 0; i < nb_iteration; i++) {
-			out = Contour::dilatation(in, mask);
+	std::vector<std::pair<int, int>> mask1, std::vector<std::pair<int, int>> mask2,
+	int nb_it1, int nb_it2){
+		cv::Mat out;
+		in.copyTo(out);
+		for (size_t i = 0; i < nb_it1; i++) {
+			out = Contour::dilatation(out, mask1);
 		}
-		for (size_t i = 0; i < nb_iteration; i++) {
-			out = Contour::erosion(in, mask);
+		for (size_t i = 0; i < nb_it2; i++) {
+			out = Contour::erosion(out, mask2);
 		}
 		return out;
 }
 
 cv::Mat Contour::fermeture_dil_dil(cv::Mat in,
-	std::vector<std::pair<int, int>> mask, int nb_iteration){
-		cv::Mat out = cv::Mat::zeros(in.rows, in.cols, CV_32F);
-		for (size_t i = 0; i < nb_iteration; i++) {
-			out = Contour::dilatation(in, mask, true);
+	std::vector<std::pair<int, int>> mask1, std::vector<std::pair<int, int>> mask2,
+	 int nb_it1, int nb_it2){
+		cv::Mat out;
+		in.copyTo(out);
+		for (size_t i = 0; i < nb_it1; i++) {
+			out = Contour::dilatation(out, mask1, true);
 		}
-		for (size_t i = 0; i < nb_iteration; i++) {
-			out = Contour::dilatation(in, mask, false);
+		for (size_t i = 0; i < nb_it2; i++) {
+			out = Contour::dilatation(out, mask2, false);
+		}
+		return out;
+}
+
+cv::Mat Contour::fermeture_dilcont_affinage(cv::Mat in, cv::Mat pente, cv::Mat gradients,
+	int nb_it1, int nb_it2){
+		cv::Mat out;
+		in.copyTo(out);
+		for (size_t i = 0; i < nb_it1; i++) {
+			out = Contour::dilatation_contour(out, pente, 3);
+		}
+		for (size_t i = 0; i < nb_it2; i++) {
+			out = Contour::affinage_max_loc(out, pente, gradients);
 		}
 		return out;
 }
@@ -131,4 +153,38 @@ cv::Mat Contour::erosion(cv::Mat in, std::vector<std::pair<int, int>> mask){
     }
   }
 	return out;
+}
+
+cv::Mat Contour::dilatation_contour(cv::Mat in, cv::Mat pente, int radius) {
+  cv::Mat out = cv::Mat::zeros(in.rows, in.cols, CV_32F);
+
+  for (int row = radius; row < in.rows-radius; row++) {
+    for (int col = radius; col < in.cols-radius; col++) {
+      if (in.at<float>(row,col) > 0.5)
+      {
+        // it is a contour
+        // on calcul le mask local dans la dir du gradient
+        int steep =  (int)pente.at<float>(row, col);
+        int dir_contour = (steep+2) % 8;
+        std::pair<int, int> dir_steep = Kernel::vec_from_direction(dir_contour);
+
+        // int dir_inv_contour = (dir_contour + 4) % 8;
+
+        std::vector<std::pair<int, int>> mask(radius*2+1);
+        for (int i = -radius; i < radius+1; i++) {
+          if (i == 0)
+            mask.push_back({0,0});
+          else
+            mask.push_back({dir_steep.first * i, dir_steep.second*i});
+        }
+        // std::pair<int, int> mask[3] =
+  			// 	{Kernel::vec_from_direction(dir_contour), {0, 0}, Kernel::vec_from_direction(dir_inv_contour)};
+
+        for (int i = 0; i < mask.size(); i++) {
+          out.at<float>(row+mask[i].first, col+mask[i].second) = 1.f;
+        }
+      }
+    }
+  }
+  return out;
 }

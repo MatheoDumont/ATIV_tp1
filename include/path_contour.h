@@ -20,7 +20,7 @@ class Path
 		 * direction d, taking into account the borders.
      */
 		static std::vector<std::pair<int, int>> direction_neighbours(int rows,
-			int cols, int row, int col, int d);
+			int cols, int row, int col, int d, bool three_neighbourhood = true);
 
 		/*
      * Return a binary matrix of contour with the path_contour method

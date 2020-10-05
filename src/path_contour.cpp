@@ -9,7 +9,7 @@
 
 
 std::vector<std::pair<int, int>> Path::direction_neighbours(int rows,
-	int cols, int row, int col, int d)
+	int cols, int row, int col, int d, bool three_neighbourhood)
 {
 	if (1 > col) // problem L
 	{
@@ -54,25 +54,45 @@ std::vector<std::pair<int, int>> Path::direction_neighbours(int rows,
 		std::vector<std::pair<int, int>> res;
 		// be careful : we use visual angles :
 		/*  3	2	1
-        4	x	0
-		 		5	6	7 */
-		if (d != 0 && d != 1 && d != 2)
-			res.push_back({row+1,col-1});
-		if (d != 1 && d != 2 && d != 3)
-			res.push_back({row-1,col});
-		if (d != 2 && d != 3 && d != 4)
-			res.push_back({row-1,col+1});
-		if (d != 3 && d != 4 && d != 5)
-			res.push_back({row,col+1});
-		if (d != 4 && d != 5 && d != 6)
-			res.push_back({row+1,col+1});
-		if (d != 5 && d != 6 && d != 7)
-			res.push_back({row+1,col});
-		if (d != 6 && d != 7 && d != 0)
-			res.push_back({row+1,col-1});
-		if (d != 7 && d != 0 && d != 1)
-			res.push_back({row,col-1});
-		// notice that if d not in [0,7], all the points are added.
+				4	x	0
+				5	6	7 */
+		if (!three_neighbourhood) {
+		  if (d != 0 && d != 1 && d != 2)
+				res.push_back({row+1,col-1});
+			if (d != 1 && d != 2 && d != 3)
+				res.push_back({row-1,col});
+			if (d != 2 && d != 3 && d != 4)
+				res.push_back({row-1,col+1});
+			if (d != 3 && d != 4 && d != 5)
+				res.push_back({row,col+1});
+			if (d != 4 && d != 5 && d != 6)
+				res.push_back({row+1,col+1});
+			if (d != 5 && d != 6 && d != 7)
+				res.push_back({row+1,col});
+			if (d != 6 && d != 7 && d != 0)
+				res.push_back({row+1,col-1});
+			if (d != 7 && d != 0 && d != 1)
+				res.push_back({row,col-1});
+			// notice that if d not in [0,7], all the points are added.
+		}
+		else {
+			if (d == 0 || d == 1 || d == 2 || d < 0 || d > 7)
+				res.push_back({row+1,col+1});
+			if (d == 1 || d == 2 || d == 3 || d < 0 || d > 7)
+				res.push_back({row+1,col});
+			if (d == 2 || d == 3 || d == 4 || d < 0 || d > 7)
+				res.push_back({row+1,col-1});
+			if (d == 3 || d == 4 || d == 5 || d < 0 || d > 7)
+				res.push_back({row,col-1});
+			if (d == 4 || d == 5 || d == 6 || d < 0 || d > 7)
+				res.push_back({row-1,col-1});
+			if (d == 5 || d == 6 || d == 7 || d < 0 || d > 7)
+				res.push_back({row-1,col});
+			if (d == 6 || d == 7 || d == 0 || d < 0 || d > 7)
+				res.push_back({row-1,col+1});
+			if (d == 7 || d == 0 || d == 1 || d < 0 || d > 7)
+				res.push_back({row,col+1});
+		}
 		return res;
 	}
 }
