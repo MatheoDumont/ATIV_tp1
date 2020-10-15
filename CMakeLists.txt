@@ -44,3 +44,5 @@ configure_file(
 configure_file(
   datas/Palpa2.jpg ${CMAKE_CURRENT_BINARY_DIR}/datas/Palpa2.jpg COPYONLY
 )
+
+file(MAKE_DIRECTORY "saved_images")
