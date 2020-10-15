@@ -84,15 +84,15 @@ int main()
   {
     // gradients 4 directions
     std::vector<cv::Mat> gradient_filters;
-    cv::Mat horizontal = (cv::Mat_<float>(3, 3) << 1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f);
-    cv::Mat vertical = (cv::Mat_<float>(3, 3) << -1 / 3.f, -1 / 3.f, -1 / 3.f, 0.f, 0.f, 0.f, 1 / 3.f, 1 / 3.f, 1 / 3.f);
+    cv::Mat horizontal = (cv::Mat_<float>(3, 3) << -1 / 3.f, 0.f, 1 / 3.f, -1 / 3.f, 0.f, 1 / 3.f, -1 / 3.f, 0.f, 1 / 3.f);
+    cv::Mat vertical = (cv::Mat_<float>(3, 3) << 1 / 3.f, 1 / 3.f, 1 / 3.f, 0.f, 0.f, 0.f, -1 / 3.f, -1 / 3.f, -1 / 3.f);
     cv::Mat quart_plus = (cv::Mat_<float>(3, 3) << 1.f / 3.f, 1.f / 3.f, 0.f, 1.f / 3.f, 0.f, -1.f / 3.f, 0.f, -1.f / 3.f, -1.f / 3.f);
     cv::Mat quart_moins = (cv::Mat_<float>(3, 3) << 0.f, 1.f / 3.f, 1.f / 3.f, -1.f / 3.f, 0.f, 1.f / 3.f, -1.f / 3.f, -1.f / 3.f, 0.f);
 
     gradient_filters.push_back(horizontal);
+    gradient_filters.push_back(quart_moins);
     gradient_filters.push_back(vertical);
     gradient_filters.push_back(quart_plus);
-    gradient_filters.push_back(quart_moins);
 
     std::vector<cv::Mat> gradient_convol = Kernel::conv2(gs, gradient_filters);
 		cv::Mat amp0 = Kernel::amplitude_0(gradient_convol);
