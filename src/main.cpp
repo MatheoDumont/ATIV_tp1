@@ -17,11 +17,12 @@
 #define IMAGE_NAME1 "datas/Palpa1.jpg"
 #define IMAGE_NAME2 "datas/Palpa2.jpg"
 #define IMAGE_NAME3 "datas/mr_piuel.jpeg"
+#define IMAGE_NAME4 "datas/square_sample_0.png"
 /*
 * Partie 1 Tp 1 Appliquer convolution sur Image
 */
 
-int main()
+int main(int argc, char *argv[])
 {
   float f[3][3] = {1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f, 1 / 3.f, 0.f, -1 / 3.f};
 
@@ -31,7 +32,11 @@ int main()
   filtres.push_back(filtre);
 
   // cv::Mat image = cv::imread("datas/square_sample.png", CV_LOAD_IMAGE_GRAYSCALE);
-  cv::Mat image = cv::imread(IMAGE_NAME0);
+  cv::Mat image;
+  if (argc > 1)
+    image = cv::imread(argv[1]);
+  else
+    image = cv::imread(IMAGE_NAME2);
   if (!image.data)
   {
     std::cerr << "Error : image or video not found" << std::endl;
@@ -124,10 +129,10 @@ int main()
 
 
 		// TEST SEUIL PATH_CONTOUR
-    // cv::imshow("seuillage path 4 directions 0.025-0.05 - rad1", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.05));
-    // cv::imshow("seuillage path 4 directions 0.025-0.08 - rad3", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.08));
-    // cv::imshow("seuillage path 4 directions 0.025-0.11 - rad5", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.11));
-    // cv::waitKey(0);
+    cv::imshow("seuillage path 4 directions 0.025-0.09 gradient", Path::path_contour(amp0 * (1 / 255.0), dir, 0.025, 0.10, true));
+    cv::imshow("seuillage path 4 directions 0.025-0.09 classique", Path::path_contour(amp0 * (1 / 255.0), dir, 0.025, 0.10, false));
+    cv::waitKey(0);
+    cv::destroyAllWindows();
 
     // TEST AFFINAGE CONTOUR SIMPLE
     cv::Mat seuille = Seuil::seuil_global(amp0 * (1 / 255.0), 0.1);

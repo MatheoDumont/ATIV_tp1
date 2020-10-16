@@ -96,8 +96,10 @@ std::vector<std::pair<int, int>> Path::direction_neighbours(int rows,
 		return res;
 	}
 }
+/*########################################################################*/
 
-cv::Mat Path::path_contour(cv::Mat amp, float seuil_low, float seuil_high)
+cv::Mat Path::path_contour(cv::Mat amp, cv::Mat angle,
+	float seuil_low, float seuil_high, bool use_gradient_angle)
 {
 	cv::Mat contour = cv::Mat::zeros(amp.rows, amp.cols, CV_32F);
   for(int row = 0; row < amp.rows; ++row) {
@@ -117,8 +119,15 @@ cv::Mat Path::path_contour(cv::Mat amp, float seuil_low, float seuil_high)
 				if (amp.at<float>(row,col) > seuil_high)
 				{// a contour not already founded : let start a path !
 					contour.at<float>(row,col) = 1.f;
-					Path::path_from_pix(amp, row, col, -1 /* no direction */,
-		 			 contour, seuil_low, seuil_high);
+					if (use_gradient_angle) {
+						Path::path_from_pix(amp, angle, row, col, -1 /* no direction */,
+							contour, seuil_low, seuil_high);
+					}
+					else {
+						Path::path_gradient_from_pix(amp, angle, row, col, -1 /* no direction */,
+							contour, seuil_low, seuil_high);
+					}
+
 				}
 				else if (amp.at<float>(row,col) < seuil_low)
 				{// not a contour at all
@@ -127,7 +136,6 @@ cv::Mat Path::path_contour(cv::Mat amp, float seuil_low, float seuil_high)
 			}
 		}
 	}
-
 	/* finally set remaining potential contour (between seuil_high and seuil_low)
 	 * to not contour. */
 
@@ -138,12 +146,12 @@ cv::Mat Path::path_contour(cv::Mat amp, float seuil_low, float seuil_high)
 				contour.at<float>(row,col) = 0.2;
 		}
 	}
-
 	return contour;
-
 }
 
-void Path::path_from_pix(cv::Mat amp, int row, int col, int direction,
+/*########################################################################*/
+
+void Path::path_from_pix(cv::Mat amp, cv::Mat angle, int row, int col, int direction,
 	cv::Mat &contour, float seuil_low, float seuil_high)
 {
 	contour.at<float>(row,col) = 1.f;
@@ -190,7 +198,7 @@ void Path::path_from_pix(cv::Mat amp, int row, int col, int direction,
 	 {
 		 	for (size_t j = 0; j < highs.size(); j++)
 		 	{
-				Path::path_from_pix(amp, highs[j].first, highs[j].second,
+				Path::path_from_pix(amp, angle, highs[j].first, highs[j].second,
 		 			Kernel::direction_from_vec(highs[j].first-row, highs[j].second-col),
 					contour, seuil_low, seuil_high);
 
@@ -200,8 +208,67 @@ void Path::path_from_pix(cv::Mat amp, int row, int col, int direction,
 	 else if (maxi > seuil_low)
 	 {
 		 contour.at<float>(argmax.first, argmax.second)=1.f;
-		 Path::path_from_pix(amp, argmax.first, argmax.second,
+		 Path::path_from_pix(amp, angle, argmax.first, argmax.second,
 			 Kernel::direction_from_vec(argmax.first-row, argmax.second-col),
+			 contour, seuil_low, seuil_high);
+	 }
+	 // otherwise : end of the contour
+}
+
+
+/*########################################################################*/
+
+void Path::path_gradient_from_pix(cv::Mat amp, cv::Mat angle, int row, int col, int direction,
+	cv::Mat &contour, float seuil_low, float seuil_high)
+{
+	contour.at<float>(row,col) = 1.f;
+	/* start from a contour, that should have been chosen and already set to 1.f*/
+
+	std::vector<std::pair<int, int>> n_pix =
+				Path::direction_neighbours(amp.rows,	amp.cols, row, col, direction);
+	/* The potential next pixels of the contour */
+
+	std::vector<std::pair<int, int>> highs;
+	std::pair<int, int> argmax;
+	float maxi = 0.f;
+
+	 for (size_t i = 0; i < n_pix.size(); i++)
+	 {// for each pixel in n_pix :
+	 		if NOT01(contour.at<float>(n_pix[i].first,n_pix[i].second))
+			{// if not yet decided if it is a contour or not
+				float a = amp.at<float>(n_pix[i].first,n_pix[i].second);
+				if (a > seuil_high)	{
+					contour.at<float>(n_pix[i].first,n_pix[i].second)=1.f;
+					highs.push_back(n_pix[i]);
+				}
+				else	{
+					if (a > maxi)	{
+						maxi = a;
+						argmax = n_pix[i];
+					}
+					contour.at<float>(n_pix[i].first,n_pix[i].second)=0.f;
+					/* we set to 0.f. If we continue the pass on the max then we will
+					 * change this choice on the argmax. */
+				}
+			}
+	 }
+
+	 if (highs.size() > 0)
+	 {
+		 	for (size_t j = 0; j < highs.size(); j++)
+		 	{
+				Path::path_gradient_from_pix(amp, angle, highs[j].first, highs[j].second,
+		 			(int) (angle.at<float>(highs[j].first, highs[j].second)+0.5 +2.),
+					contour, seuil_low, seuil_high);
+
+				// recursive calls on highs
+			}
+	 }
+	 else if (maxi > seuil_low)
+	 {
+		 contour.at<float>(argmax.first, argmax.second)=1.f;
+		 Path::path_gradient_from_pix(amp, angle, argmax.first, argmax.second,
+			 (int) (angle.at<float>(argmax.first, argmax.second)+0.5 +2.),
 			 contour, seuil_low, seuil_high);
 	 }
 	 // otherwise : end of the contour
