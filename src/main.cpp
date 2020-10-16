@@ -17,8 +17,8 @@
 #define IMAGE_NAME1 "datas/Palpa1.jpg"
 #define IMAGE_NAME2 "datas/Palpa2.jpg"
 #define IMAGE_NAME3 "datas/mr_piuel.jpeg"
+#define IMAGE_NAME4 "datas/Lenna.png"
 
-#define saves "saved_images/"
 /*
 * Partie 1 Tp 1 Appliquer convolution sur Image
 */
@@ -30,7 +30,7 @@ int main()
     cv::Mat quart_moins = (cv::Mat_<float>(3, 3) << 0.f, 1.f / 3.f, 1.f / 3.f, -1.f / 3.f, 0.f, 1.f / 3.f, -1.f / 3.f, -1.f / 3.f, 0.f);
 
     cv::Mat greyscale_image;
-    cv::Mat im = cv::imread(IMAGE_NAME0);
+    cv::Mat im = cv::imread(IMAGE_NAME4);
 
     cv::cvtColor(im, greyscale_image, cv::COLOR_BGR2GRAY);
     greyscale_image.convertTo(greyscale_image, CV_32F);
@@ -43,23 +43,22 @@ int main()
 
         std::vector<cv::Mat> gradient_convol = Kernel::conv2(greyscale_image, kernels);
         cv::Mat ampl0 = Kernel::amplitude_0(gradient_convol);
-        cv::Mat ampl2 = Kernel::amplitude_2(gradient_convol) * (1 / 255.0);
+        cv::Mat ampl2 = Kernel::amplitude_2(gradient_convol);
 
         cv::imshow("bidir_grad_amplitude_0 grad", ampl0 * (1 / 255.0));
-        cv::imshow("bidir_grad_amplitude_2 grad", ampl2);
+        cv::imshow("bidir_grad_amplitude_2 grad", ampl2 * (1 / 255.0));
         cv::waitKey(0);
 
         cv::Mat gradient_angle_color = Kernel::color_gradient_im(ampl0,
                                                                  Kernel::angle_arctan(gradient_convol[0],
                                                                                       gradient_convol[1]));
-        gradient_angle_color *= (1 / 255.0);
 
-        cv::imshow("color gradient", gradient_angle_color);
+        cv::imshow("bidir_grad_angle_color", gradient_angle_color * (1 / 255.0));
         cv::waitKey(0);
 
-        cv::imwrite(saves + std::string("ampl0_gradient.jpg"), ampl0);
-        cv::imwrite(saves + std::string("ampl2_gradient.jpg"), ampl2);
-        cv::imwrite(saves + std::string("bidir_grad_angle_color.jpg"), gradient_angle_color);
+        cv::imwrite("bidir_ampl0_gradient.jpg", ampl0);
+        cv::imwrite("bidir_ampl2_gradient.jpg", ampl2);
+        cv::imwrite("bidir_grad_angle_color.jpg", gradient_angle_color);
     }
     cv::destroyAllWindows();
 
@@ -79,14 +78,14 @@ int main()
         dir = Kernel::angle(gradient_convol);
         cv::Mat gradient_angle_color = Kernel::color_gradient_im(amp0, dir * (M_PI / 4));
 
-        cv::imshow("multidir_grad_amp0", amp0);
+        cv::imshow("multidir_grad_amp0", amp0 * (1 / 255.0));
         cv::waitKey(0);
 
         cv::imshow("multidir_grad_angle_color", gradient_angle_color * (1 / 255.0));
         cv::waitKey(0);
 
-        cv::imwrite(saves + std::string("multidir_grad_amp0.jpg"), amp0);
-        cv::imwrite(saves + std::string("multidir_grad_angle_color.jpg"), gradient_angle_color * (1 / 255.0));
+        cv::imwrite("multidir_grad_amp0.jpg", amp0);
+        cv::imwrite("multidir_grad_angle_color.jpg", gradient_angle_color);
     }
     cv::destroyAllWindows();
 
@@ -103,9 +102,9 @@ int main()
         cv::imshow("seuillage global 4 directions - 0.1", seuil_01);
         cv::waitKey(0);
 
-        cv::imwrite(saves + std::string("seuil_global_0025.jpg"), seuil_0025);
-        cv::imwrite(saves + std::string("seuil_global_005.jpg"), seuil_005);
-        cv::imwrite(saves + std::string("seuil_global_01.jpg"), seuil_01);
+        cv::imwrite("seuil_global_0025.jpg", seuil_0025 * 255.0);
+        cv::imwrite("seuil_global_005.jpg", seuil_005 * 255.0);
+        cv::imwrite("seuil_global_01.jpg", seuil_01 * 255.0);
 
         cv::destroyAllWindows();
 
@@ -120,9 +119,9 @@ int main()
 
         cv::waitKey(0);
 
-        cv::imwrite(saves + std::string("seuil_hyste_007_0161.jpg"), hyste_007_0161);
-        cv::imwrite(saves + std::string("seuil_hyste_007_0163.jpg"), hyste_007_0163);
-        cv::imwrite(saves + std::string("seuil_hyste_007_0165.jpg"), hyste_007_0165);
+        cv::imwrite("seuil_hyste_007_0161.jpg", hyste_007_0161 * 255.0);
+        cv::imwrite("seuil_hyste_007_0163.jpg", hyste_007_0163 * 255.0);
+        cv::imwrite("seuil_hyste_007_0165.jpg", hyste_007_0165 * 255.0);
     }
 
     cv::destroyAllWindows();
@@ -140,7 +139,7 @@ int test_main()
     filtres.push_back(filtre);
 
     // cv::Mat image = cv::imread("datas/square_sample.png", CV_LOAD_IMAGE_GRAYSCALE);
-    cv::Mat image = cv::imread(IMAGE_NAME0);
+    cv::Mat image = cv::imread(IMAGE_NAME2);
     if (!image.data)
     {
         std::cerr << "Error : image or video not found" << std::endl;
@@ -232,10 +231,10 @@ int test_main()
         // cv::waitKey(0);
 
         // TEST SEUIL PATH_CONTOUR
-        // cv::imshow("seuillage path 4 directions 0.025-0.05 - rad1", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.05));
-        // cv::imshow("seuillage path 4 directions 0.025-0.08 - rad3", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.08));
-        // cv::imshow("seuillage path 4 directions 0.025-0.11 - rad5", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.11));
-        // cv::waitKey(0);
+        cv::imshow("seuillage path 4 directions 0.025-0.05 - rad1", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.05));
+        cv::imshow("seuillage path 4 directions 0.025-0.08 - rad3", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.08));
+        cv::imshow("seuillage path 4 directions 0.025-0.11 - rad5", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.11));
+        cv::waitKey(0);
 
         // TEST AFFINAGE CONTOUR SIMPLE
         cv::Mat seuille = Seuil::seuil_global(amp0 * (1 / 255.0), 0.1);
@@ -260,6 +259,8 @@ int test_main()
 
         // Dilatation locale
         cv::Mat dilate = Contour::dilatation_contour(seuille, dir, 2);
+        dilate = Contour::dilatation_contour(dilate, dir, 2);
+
         cv::imshow("Dilatation locale", dilate);
         cv::waitKey(0);
 
