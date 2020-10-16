@@ -33,6 +33,9 @@ target_link_libraries(
 )
 
 configure_file(
+  datas/square_sample_0.png ${CMAKE_CURRENT_BINARY_DIR}/datas/square_sample_0.png COPYONLY
+)
+configure_file(
   datas/square_sample.png ${CMAKE_CURRENT_BINARY_DIR}/datas/square_sample.png COPYONLY
 )
 configure_file(

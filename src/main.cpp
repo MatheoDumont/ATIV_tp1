@@ -231,10 +231,11 @@ int test_main()
         // cv::waitKey(0);
 
         // TEST SEUIL PATH_CONTOUR
-        cv::imshow("seuillage path 4 directions 0.025-0.05 - rad1", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.05));
-        cv::imshow("seuillage path 4 directions 0.025-0.08 - rad3", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.08));
-        cv::imshow("seuillage path 4 directions 0.025-0.11 - rad5", Path::path_contour(amp0 * (1 / 255.0), 0.025, 0.11));
-        cv::waitKey(0);
+
+        // cv::imshow("seuillage path 4 directions 0.025-0.05 - rad1", Path::path_contour(amp0 * (1 / 255.0),dir, 0.025, 0.05));
+        // cv::imshow("seuillage path 4 directions 0.025-0.08 - rad3", Path::path_contour(amp0 * (1 / 255.0),dir, 0.025, 0.08));
+        // cv::imshow("seuillage path 4 directions 0.025-0.11 - rad5", Path::path_contour(amp0 * (1 / 255.0),dir, 0.025, 0.11));
+        // cv::waitKey(0);
 
         // TEST AFFINAGE CONTOUR SIMPLE
         cv::Mat seuille = Seuil::seuil_global(amp0 * (1 / 255.0), 0.1);
