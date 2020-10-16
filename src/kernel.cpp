@@ -243,8 +243,6 @@ cv::Mat Kernel::angle_arctan(cv::Mat mx, cv::Mat my)
     for (size_t col = 0; col < mx.cols; col++)
     {
       temporary = atan2(my.at<float>(row, col), mx.at<float>(row, col));
-      if (mx.at<float>(row, col) < 0)// in order to have the right angle
-	      temporary += M_PI;// not only in [-pi/2, pi/2]
       if (temporary < 0) // in order to have the same angle but in [0,2pi]
 				temporary += 2*M_PI;
       res.at<float>(row, col) = temporary;
@@ -296,7 +294,7 @@ cv::Mat Kernel::color_gradient_im(cv::Mat amp, cv::Mat ang)
     for (int col = 0; col < img.cols; col++)
       {
 	HSVtoRGB(ang.at<float>(row, col)*180.0/M_PI,
-		 amp.at<float>(row, col),
+		 255.,
 		 amp.at<float>(row, col),
 		 img.at<cv::Vec3f>(row,col));
       }

@@ -128,12 +128,12 @@ cv::Mat Path::path_contour(cv::Mat amp, cv::Mat angle,
 					contour.at<float>(row, col) = 1.f;
 					if (use_gradient_angle)
 					{
-						Path::path_from_pix(amp, angle, row, col, -1 /* no direction */,
+						Path::path_gradient_from_pix(amp, angle, row, col, -1 /* no direction */,
 											contour, seuil_low, seuil_high);
 					}
 					else
 					{
-						Path::path_gradient_from_pix(amp, angle, row, col, -1 /* no direction */,
+						Path::path_from_pix(amp, angle, row, col, -1 /* no direction */,
 													 contour, seuil_low, seuil_high);
 					}
 				}
