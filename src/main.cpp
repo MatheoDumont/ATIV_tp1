@@ -44,16 +44,15 @@ int main()
         std::vector<cv::Mat> gradient_convol = Kernel::conv2(greyscale_image, kernels);
         cv::Mat ampl0 = Kernel::amplitude_0(gradient_convol);
         cv::Mat ampl2 = Kernel::amplitude_2(gradient_convol);
+        cv::Mat gradient_angle_color = Kernel::color_gradient_im(ampl0,
+                                                                 Kernel::angle_arctan(gradient_convol[0],
+                                                                                      gradient_convol[1]));
 
         cv::imshow("bidir_grad_amplitude_0 grad", ampl0 * (1 / 255.0));
         cv::imshow("bidir_grad_amplitude_2 grad", ampl2 * (1 / 255.0));
         cv::waitKey(0);
 
-        cv::Mat gradient_angle_color = Kernel::color_gradient_im(ampl0,
-                                                                 Kernel::angle_arctan(gradient_convol[0],
-                                                                                      gradient_convol[1]));
-
-        cv::imshow("bidir_grad_angle_color", gradient_angle_color * (1 / 255.0));
+                cv::imshow("bidir_grad_angle_color", gradient_angle_color * (1 / 255.0));
         cv::waitKey(0);
 
         cv::imwrite("bidir_ampl0_gradient.jpg", ampl0);
@@ -130,10 +129,15 @@ int main()
     // AFFINAGE CONTOUR
     {
         cv::Mat affinage_max_l = Contour::affinage_max_loc(seuil_01, dir, amp0);
+        cv::Mat dil_cont = Contour::dilatation_contour(seuil_01, dir, 3);
+
         cv::imshow("Affinage contour simple", affinage_max_l);
+        cv::imshow("Dilatation contour seuil global 0.1", dil_cont);
+
         cv::waitKey(0);
 
-        cv::imwrite("affinage_contour_local_seuilg01.jpg", affinage_max_l);
+        cv::imwrite("affinage_contour_local_seuilg01.jpg", affinage_max_l * 255.0);
+        cv::imwrite("dil_contour_seuilg01.jpg", dil_cont * 255.0);
     }
     cv::destroyAllWindows();
 
