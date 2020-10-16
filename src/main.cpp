@@ -89,13 +89,14 @@ int main()
     }
     cv::destroyAllWindows();
 
+    cv::Mat seuil_01;
     // TEST SEUIL GLOBAL et HYSTERESIS
     {
 
         // GLOBAL
         cv::Mat seuil_0025 = Seuil::seuil_global(amp0 * (1 / 255.0), 0.025);
         cv::Mat seuil_005 = Seuil::seuil_global(amp0 * (1 / 255.0), 0.05);
-        cv::Mat seuil_01 = Seuil::seuil_global(amp0 * (1 / 255.0), 0.1);
+        seuil_01 = Seuil::seuil_global(amp0 * (1 / 255.0), 0.1);
 
         cv::imshow("seuillage global 4 directions - 0.025", seuil_0025);
         cv::imshow("seuillage global 4 directions - 0.05", seuil_005);
@@ -124,6 +125,16 @@ int main()
         cv::imwrite("seuil_hyste_007_0165.jpg", hyste_007_0165 * 255.0);
     }
 
+    cv::destroyAllWindows();
+
+    // AFFINAGE CONTOUR
+    {
+        cv::Mat affinage_max_l = Contour::affinage_max_loc(seuil_01, dir, amp0);
+        cv::imshow("Affinage contour simple", affinage_max_l);
+        cv::waitKey(0);
+
+        cv::imwrite("affinage_contour_local_seuilg01.jpg", affinage_max_l);
+    }
     cv::destroyAllWindows();
 
     return 0;
