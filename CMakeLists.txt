@@ -33,6 +33,9 @@ target_link_libraries(
 )
 
 configure_file(
+  datas/square_sample_0.png ${CMAKE_CURRENT_BINARY_DIR}/datas/square_sample_0.png COPYONLY
+)
+configure_file(
   datas/square_sample.png ${CMAKE_CURRENT_BINARY_DIR}/datas/square_sample.png COPYONLY
 )
 configure_file(
@@ -44,3 +47,5 @@ configure_file(
 configure_file(
   datas/Palpa2.jpg ${CMAKE_CURRENT_BINARY_DIR}/datas/Palpa2.jpg COPYONLY
 )
+
+file(MAKE_DIRECTORY "saved_images")
