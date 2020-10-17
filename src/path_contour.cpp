@@ -153,7 +153,7 @@ cv::Mat Path::path_contour(cv::Mat amp, cv::Mat angle,
 		for (int col = 0; col < amp.cols; ++col)
 		{
 			if NOT01 (contour.at<float>(row, col))
-				contour.at<float>(row, col) = 0.2;
+				contour.at<float>(row, col) = 0.f;
 		}
 	}
 	return contour;

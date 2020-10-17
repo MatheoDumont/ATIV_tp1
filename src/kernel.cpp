@@ -22,19 +22,19 @@ int Kernel::direction_from_vec(int row, int col)
 				5	6	7 */
 	if (row == 0 && col >  0)
 		return 0;
-	if (row >  0 && col >  0)
+	if (row <  0 && col >  0)
 		return 1;
-	if (row >  0 && col == 0)
+	if (row <  0 && col == 0)
 		return 2;
-	if (row >  0 && col <  0)
+	if (row <  0 && col <  0)
 		return 3;
 	if (row == 0 && col <  0)
 		return 4;
-	if (row <  0 && col <  0)
+	if (row >  0 && col <  0)
 		return 5;
-	if (row <  0 && col == 0)
+	if (row >  0 && col == 0)
 		return 6;
-	if (row <  0 && col >  0)
+	if (row >  0 && col >  0)
 		return 7;
 	return -1; // case (0,0)
 }
@@ -46,25 +46,25 @@ std::pair<int,int> Kernel::vec_from_direction(int dir)
 			return {0,1};
 		break;
 		case 1:
-			return {1,1};
+			return {-1,1};
 		break;
 		case 2:
-			return {1,0};
+			return {-1,0};
 		break;
 		case 3:
-			return {1,-1};
+			return {-1,-1};
 		break;
 		case 4:
 			return {0,-1};
 		break;
 		case 5:
-			return {-1,-1};
+			return {1,-1};
 		break;
 		case 6:
-			return {-1,0};
+			return {1,0};
 		break;
 		case 7:
-			return {-1,1};
+			return {1,1};
 		break;
 		default:
 			return {0,0};

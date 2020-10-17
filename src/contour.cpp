@@ -193,7 +193,7 @@ cv::Mat Contour::dilatation_contour(cv::Mat in, cv::Mat pente, int radius)
 			{
 				// it is a contour
 				// on calcul le mask local dans la dir du gradient
-				int steep = (int)pente.at<float>(row, col);
+				int steep = (int)(pente.at<float>(row, col)+0.5);
 				int dir_contour = (steep + 2) % 8;
 				std::pair<int, int> dir_steep = Kernel::vec_from_direction(dir_contour);
 
