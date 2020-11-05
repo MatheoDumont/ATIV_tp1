@@ -6,12 +6,12 @@
 #include <opencv4/opencv2/videoio.hpp>
 #include <opencv4/opencv2/video/background_segm.hpp>
 #include <iostream>
-#include "kernel.h"
+#include <cassert>
 #include <math.h>
+#include "kernel.h"
 #include "seuil.h"
 #include "path_contour.h"
 #include "contour.h"
-#include <cassert>
 
 #define IMAGE_NAME0 "datas/square_sample.png"
 #define IMAGE_NAME1 "datas/Palpa1.jpg"
@@ -22,7 +22,7 @@
 /*
 * Partie 1 Tp 1 Appliquer convolution sur Image
 */
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     cv::Mat horizontal = (cv::Mat_<float>(3, 3) << -1 / 3.f, 0.f, 1 / 3.f, -1 / 3.f, 0.f, 1 / 3.f, -1 / 3.f, 0.f, 1 / 3.f);
     cv::Mat vertical = (cv::Mat_<float>(3, 3) << 1 / 3.f, 1 / 3.f, 1 / 3.f, 0.f, 0.f, 0.f, -1 / 3.f, -1 / 3.f, -1 / 3.f);
@@ -32,9 +32,9 @@ int main(int argc, char* argv[])
     cv::Mat greyscale_image;
     cv::Mat im;
     if (argc < 2)
-      im = cv::imread(IMAGE_NAME4);
+        im = cv::imread(IMAGE_NAME4);
     else
-      im = cv::imread(argv[1]);
+        im = cv::imread(argv[1]);
 
     cv::cvtColor(im, greyscale_image, cv::COLOR_BGR2GRAY);
     greyscale_image.convertTo(greyscale_image, CV_32F);
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
         cv::imshow("bidir_grad_amplitude_2 grad", ampl2 * (1 / 255.0));
         cv::waitKey(0);
 
-                cv::imshow("bidir_grad_angle_color", gradient_angle_color * (1 / 255.0));
+        cv::imshow("bidir_grad_angle_color", gradient_angle_color * (1 / 255.0));
         cv::waitKey(0);
 
         cv::imwrite("bidir_ampl0_gradient.jpg", ampl0);
@@ -129,7 +129,6 @@ int main(int argc, char* argv[])
         //cv::imwrite("seuil_hyste_004_0121.jpg", hyste_004_0121 * 255.0);
         cv::imwrite("affinage_seuil_hyste_007_0161_color.jpg", gradient_angle_color * 255.0);
         cv::imwrite("affinage_seuil_hyste_007_0161.jpg", affinage * 255.0);
-
     }
 
     cv::destroyAllWindows();
@@ -154,54 +153,53 @@ int main(int argc, char* argv[])
     }
     cv::destroyAllWindows();
 
-
     // TEST FERMETURE DES CONTOURS PAR DILATATION EROSION AVEC ELEMENT
     // STRUCTURANT ISOTROPE
     {
 
-    std::vector<std::pair<int, int>> mask0{{1, -1}, {1, 0}, {1, 1}, {0, -1}, {0, 0}, {0, 1}, {-1, -1}, {-1, 0}, {-1, 1}};
-    std::vector<std::pair<int, int>> mask1{
-        {2, -1}, {2, 0}, {2, 1}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}, {0, -2}, {0, -1}, {0, 0}, {0, 1}, {0, 2}, {-1, -2}, {-1, -1}, {-1, 0}, {-1, 1}, {-1, 2}, {-2, -1}, {-2, 0}, {-2, 1}};
+        std::vector<std::pair<int, int>> mask0{{1, -1}, {1, 0}, {1, 1}, {0, -1}, {0, 0}, {0, 1}, {-1, -1}, {-1, 0}, {-1, 1}};
+        std::vector<std::pair<int, int>> mask1{
+            {2, -1}, {2, 0}, {2, 1}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}, {0, -2}, {0, -1}, {0, 0}, {0, 1}, {0, 2}, {-1, -2}, {-1, -1}, {-1, 0}, {-1, 1}, {-1, 2}, {-2, -1}, {-2, 0}, {-2, 1}};
 
-    cv::Mat dil_ero_0011 = Contour::fermeture_dil_ero(seuil_01, mask0,mask0,1,1);
-    cv::Mat dil_ero_1011 = Contour::fermeture_dil_ero(seuil_01, mask1,mask0,1,1);
-    cv::Mat dil_ero_0022 = Contour::fermeture_dil_ero(seuil_01, mask0,mask0,2,2);
-    cv::Mat affinage_dil = Contour::affinage_max_loc(dil_ero_0011, dir, amp0);
-    cv::Mat gradient_angle_color = Kernel::color_gradient_im(affinage_dil, dir * (M_PI / 4));
+        cv::Mat dil_ero_0011 = Contour::fermeture_dil_ero(seuil_01, mask0, mask0, 1, 1);
+        cv::Mat dil_ero_1011 = Contour::fermeture_dil_ero(seuil_01, mask1, mask0, 1, 1);
+        cv::Mat dil_ero_0022 = Contour::fermeture_dil_ero(seuil_01, mask0, mask0, 2, 2);
+        cv::Mat affinage_dil = Contour::affinage_max_loc(dil_ero_0011, dir, amp0);
+        cv::Mat gradient_angle_color = Kernel::color_gradient_im(affinage_dil, dir * (M_PI / 4));
 
-    cv::imshow("Fermeture dil_ero it:1,1 mask0 then mask0", dil_ero_0011);
-    cv::imshow("Fermeture dil_ero it:1,1 mask1 then mask0", dil_ero_1011);
-    cv::imshow("Fermeture dil_ero it:2,2 mask0 then mask0", dil_ero_0022);
-    cv::imshow("affinage Fermeture dil_ero it:2,2 mask0 then mask0", affinage_dil);
-    // cv::imshow("Fermeture dil_dil it:1,0 mask0", Contour::fermeture_dil_dil(seuil_01, mask1,mask0,3,3));
+        cv::imshow("Fermeture dil_ero it:1,1 mask0 then mask0", dil_ero_0011);
+        cv::imshow("Fermeture dil_ero it:1,1 mask1 then mask0", dil_ero_1011);
+        cv::imshow("Fermeture dil_ero it:2,2 mask0 then mask0", dil_ero_0022);
+        cv::imshow("affinage Fermeture dil_ero it:2,2 mask0 then mask0", affinage_dil);
+        // cv::imshow("Fermeture dil_dil it:1,0 mask0", Contour::fermeture_dil_dil(seuil_01, mask1,mask0,3,3));
 
-    cv::waitKey(0);
+        cv::waitKey(0);
 
-    cv::imwrite("fermeture_1_1_mask0_0.jpg", dil_ero_0011 * 255.);
-    //cv::imwrite("fermeture_1_1_mask1_0.jpg", dil_ero_1011 * 255.);
-    //cv::imwrite("fermeture_2_2_mask0_0.jpg", dil_ero_0022 * 255.);
-    cv::imwrite("affinage_fermeture_1_1_mask0_0_color.jpg", gradient_angle_color * 255.);
-    cv::imwrite("affinage_fermeture_1_1_mask0_0.jpg", affinage_dil * 255.);
+        cv::imwrite("fermeture_1_1_mask0_0.jpg", dil_ero_0011 * 255.);
+        //cv::imwrite("fermeture_1_1_mask1_0.jpg", dil_ero_1011 * 255.);
+        //cv::imwrite("fermeture_2_2_mask0_0.jpg", dil_ero_0022 * 255.);
+        cv::imwrite("affinage_fermeture_1_1_mask0_0_color.jpg", gradient_angle_color * 255.);
+        cv::imwrite("affinage_fermeture_1_1_mask0_0.jpg", affinage_dil * 255.);
     }
     cv::destroyAllWindows();
 
     // TEST SEUIL PATH_CONTOUR
     {
-    cv::Mat seuil_path010 = Path::path_contour(amp0 * (1 / 255.0),dir, 0.035, 0.10);
-    cv::Mat seuil_path012 = Path::path_contour(amp0 * (1 / 255.0),dir, 0.025, 0.12);
-    cv::Mat affinage_path = Contour::affinage_max_loc(seuil_path012, dir, amp0);
-    cv::Mat gradient_angle_color = Kernel::color_gradient_im(affinage_path, dir * (M_PI / 4));
+        cv::Mat seuil_path010 = Path::path_contour(amp0 * (1 / 255.0), dir, 0.035, 0.10);
+        cv::Mat seuil_path012 = Path::path_contour(amp0 * (1 / 255.0), dir, 0.025, 0.12);
+        cv::Mat affinage_path = Contour::affinage_max_loc(seuil_path012, dir, amp0);
+        cv::Mat gradient_angle_color = Kernel::color_gradient_im(affinage_path, dir * (M_PI / 4));
 
-    cv::imshow("seuillage path_contour 0.035-0.10 - rad3", seuil_path010);
-    cv::imshow("seuillage path_contour 0.025-0.12 - rad5", seuil_path012);
-    cv::imshow("affinage + color_angle path_contour 0.025-0.12 - rad5", gradient_angle_color);
+        cv::imshow("seuillage path_contour 0.035-0.10 - rad3", seuil_path010);
+        cv::imshow("seuillage path_contour 0.025-0.12 - rad5", seuil_path012);
+        cv::imshow("affinage + color_angle path_contour 0.025-0.12 - rad5", gradient_angle_color);
 
-    cv::waitKey(0);
+        cv::waitKey(0);
 
-    //cv::imwrite("path_0035_010.jpg", seuil_path010 * 255.);
-    cv::imwrite("path_0025_012.jpg", seuil_path012 * 255.);
-    cv::imwrite("affinage_path_0025_012.jpg", affinage_path * 255.);
-    cv::imwrite("affinage_path_0025_012_color.jpg", gradient_angle_color * 255.);
+        //cv::imwrite("path_0035_010.jpg", seuil_path010 * 255.);
+        cv::imwrite("path_0025_012.jpg", seuil_path012 * 255.);
+        cv::imwrite("affinage_path_0025_012.jpg", affinage_path * 255.);
+        cv::imwrite("affinage_path_0025_012_color.jpg", gradient_angle_color * 255.);
     }
     cv::destroyAllWindows();
 
@@ -330,9 +328,9 @@ int test_main()
         std::vector<std::pair<int, int>> mask0{{1, -1}, {1, 0}, {1, 1}, {0, -1}, {0, 0}, {0, 1}, {-1, -1}, {-1, 0}, {-1, 1}};
         std::vector<std::pair<int, int>> mask1{
             {2, -1}, {2, 0}, {2, 1}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}, {0, -2}, {0, -1}, {0, 0}, {0, 1}, {0, 2}, {-1, -2}, {-1, -1}, {-1, 0}, {-1, 1}, {-1, 2}, {-2, -1}, {-2, 0}, {-2, 1}};
-        cv::imshow("Fermeture dil_ero it:1,1 mask0", Contour::fermeture_dil_ero(seuille, mask1,mask0,1,1));
-        cv::imshow("Fermeture dil_ero it:2,2 mask0", Contour::fermeture_dil_ero(seuille, mask1,mask0,2,2));
-        cv::imshow("Fermeture dil_ero it:2,1 mask0", Contour::fermeture_dil_ero(seuille, mask1,mask0,2,1));
+        cv::imshow("Fermeture dil_ero it:1,1 mask0", Contour::fermeture_dil_ero(seuille, mask1, mask0, 1, 1));
+        cv::imshow("Fermeture dil_ero it:2,2 mask0", Contour::fermeture_dil_ero(seuille, mask1, mask0, 2, 2));
+        cv::imshow("Fermeture dil_ero it:2,1 mask0", Contour::fermeture_dil_ero(seuille, mask1, mask0, 2, 1));
         // cv::imshow("Fermeture dil_ero it:1,0 mask0", Contour::fermeture_dil_ero(seuille, mask1,mask0,3,3));
         cv::waitKey(0);
         cv::destroyAllWindows();

@@ -1,5 +1,6 @@
 build/**
 
+*.jpg
 # C++
 # Prerequisites
 *.d
