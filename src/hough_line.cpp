@@ -53,6 +53,13 @@ Line_paremeters HoughLine::compute_line_parameters(Point i, Point j)
     float rho = abs(xi * yj - xj * yi) / sqrt(pow(xj - xi, 2) + pow(yj - yi, 2));
     float theta = std::atan((xi - xj) / (yj - yi));
 
+    // pour garder theta dans l'intervalle [3pi/2, pi]
+    if (theta > M_PI && theta < (M_PI + M_PI_2))
+        theta -= M_PI;
+
+    if (theta < 0)
+        theta += 2 * M_PI;
+
     return Line_paremeters({theta, rho});
 }
 
