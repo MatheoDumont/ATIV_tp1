@@ -6,15 +6,19 @@
 #include <opencv4/opencv2/core.hpp>
 #include "math.h"
 
-typedef std::pair<std::pair<int, int>, std::pair<int, int>> Segment;
+// typedef std::pair<std::pair<int, int>, std::pair<int, int>> Segment;
 
-class Hough
+class HoughLine
 {
 private:
-    Hough(/* args */);
-    ~Hough();
+    cv::Mat image;
+    int n_theta, n_rho;
+    float d_theta, d_rho;
+    cv::Mat accumulator;
 
 public:
+    HoughLine(cv::Mat image, int n_theta, int n_rho);
+    ~HoughLine();
     //Plan :
     /* It would be interesting to create structure of Line (+ Circle and
     * Segment) pour éviter de se trimballer des paires de paires de floats ou
@@ -27,7 +31,7 @@ public:
     * Il faudrait faire plusieurs fichiers :
     * - accumulator.cpp/.h pour les accumulateurs.
     * - vote.cpp/.h pour les votes.
-    * - et peut-être hough.cpp/.h pour Line, Circle, Segment et leurs
+    * - et peut-être hough_line.cpp/.h pour Line, Circle, Segment et leurs
     *      accumulator_updates.
     */
 
@@ -45,12 +49,16 @@ public:
     * theta \in [-pi/2,pi] (dtheta = 3pi/(2*N_theta))
     * rho   \in [0, sqrt(H*H+W*W)] (drho = sqrt(H*H+W*W)/N_rho)
     */
-    static cv::Mat accumulator_line(cv::Mat image, int N_rho, int N_theta);
+    // on le fait dans le constructeur
+    // cv::Mat accumulator_line(cv::Mat image, int N_rho, int N_theta);
+    // cv::Mat create_accumulator();
+
 
     /*
      * Vote for rho and theta by rounding to the closer index.
      */
-    static void vote_accumulator_lines(cv::Mat &accumulator, float rho, float theta);
+    // void vote_accumulator_lines(cv::Mat &accumulator, float rho, float theta);
+    void vote_accumulator(float rho, float theta);
 
     /*
     * Compute accumulator of a line, with polar coordinates, from a list
@@ -59,9 +67,9 @@ public:
     * theta \in [-pi/2,pi] (dtheta = 3pi/(2*N_theta))
     * rho   \in [0, sqrt(H*H+W*W)] (drho = sqrt(H*H+W*W)/N_rho)
     */
-    cv::Mat accumulator_line_list(std::vector<std::pair<int, int>> list_of_points,
-                                  int N_rho, int N_theta,
-                                  int H, int W);
+    // cv::Mat accumulator_line_list(std::vector<std::pair<int, int>> list_of_points,
+    //                               int N_rho, int N_theta,
+    //                               int H, int W);
 
     //=================
     /* Vote
@@ -71,15 +79,15 @@ public:
     /*
     * Keep the lines that are local maximas above a threshold.
     */
-    std::vector<std::pair<float, float>> vote_maxima_locaux(cv::Mat accumulator,
-                                                            float threshold);
+    // std::vector<std::pair<float, float>> vote_maxima_locaux(cv::Mat accumulator,
+    //                                                         float threshold);
 
     /*
     * Apply a mean filter on the accumulator and keep the lines that are local
     * maximas above a threshold.
     */
-    std::vector<std::pair<float, float>> vote_maxima_locaux_mean(cv::Mat accumulator,
-                                                                 float threshold);
+    // std::vector<std::pair<float, float>> vote_maxima_locaux_mean(cv::Mat accumulator,
+    //                                                              float threshold);
 
     //=================
     /* Accumulators for circles */
@@ -89,19 +97,19 @@ public:
     * binary image.
     * Three parameters (x,y,r) so returns a matrix 3D.
     */
-    cv::Mat accumulator_circle(cv::Mat image,
-                               int N_x, int N_y, int N_r,
-                               float r_min, float r_max);
+    // cv::Mat accumulator_circle(cv::Mat image,
+    //                            int N_x, int N_y, int N_r,
+    //                            float r_min, float r_max);
 
     /*
     * Compute accumulator of a circle, with polar coordinates, from a list
     * of points.
     *
     */
-    cv::Mat accumulator_circle_list(std::vector<std::pair<int, int>> list_of_points,
-                                    int N_x, int N_y, int N_r,
-                                    float r_min, float r_max,
-                                    int H, int W);
+    // cv::Mat accumulator_circle_list(std::vector<std::pair<int, int>> list_of_points,
+    //                                 int N_x, int N_y, int N_r,
+    //                                 float r_min, float r_max,
+    //                                 int H, int W);
 
     //=================
     /* Post processing*/
@@ -109,6 +117,6 @@ public:
     /*
     * Search for segment bounds.
     */
-    std::vector<Segment> find_line_bounds(std::vector<std::pair<float, float>> lines, cv::Mat image);
+    // std::vector<Segment> find_line_bounds(std::vector<std::pair<float, float>> lines, cv::Mat image);
 };
 #endif

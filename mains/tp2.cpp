@@ -7,7 +7,7 @@
 #include "contour.h"
 
 #define IMAGE_NAME0 "datas/square_sample.png"
-#include "hough.h"
+#include "hough_line.h"
 
 
 int main(int argc, char *argv[])
