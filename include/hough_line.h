@@ -7,6 +7,8 @@
 #include "math.h"
 
 // typedef std::pair<std::pair<int, int>, std::pair<int, int>> Segment;
+typedef std::pair<float, float> Line_paremeters;
+typedef std::pair<int, int> Point;
 
 class HoughLine
 {
@@ -53,6 +55,7 @@ public:
     // cv::Mat accumulator_line(cv::Mat image, int N_rho, int N_theta);
     // cv::Mat create_accumulator();
 
+    Line_paremeters compute_line_parameters(Point i, Point j);
 
     /*
      * Vote for rho and theta by rounding to the closer index.

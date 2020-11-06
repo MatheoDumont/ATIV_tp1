@@ -9,7 +9,6 @@
 #define IMAGE_NAME0 "datas/square_sample.png"
 #include "hough_line.h"
 
-
 int main(int argc, char *argv[])
 {
     return 0;

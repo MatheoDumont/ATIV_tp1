@@ -45,6 +45,17 @@ void HoughLine::vote_accumulator(float rho, float theta)
     accumulator.at<int>(idx_theta, idx_rho) += 1;
 }
 
+Line_paremeters HoughLine::compute_line_parameters(Point i, Point j)
+{
+    float xi = i.first, yi = i.second;
+    float xj = j.first, yj = j.second;
+
+    float rho = abs(xi * yj - xj * yi) / sqrt(pow(xj - xi, 2) + pow(yj - yi, 2));
+    float theta = std::atan((xi - xj) / (yj - yi));
+
+    return Line_paremeters({theta, rho});
+}
+
 // cv::Mat Hough::accumulator_line(cv::Mat image, int N_rho, int N_theta)
 // {
 //     // int rows = ceil((M_PI + M_PI_2) / float(N_theta));
