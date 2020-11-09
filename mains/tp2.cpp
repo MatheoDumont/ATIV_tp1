@@ -1,4 +1,6 @@
 #include <opencv4/opencv2/core.hpp>
+#include <opencv4/opencv2/highgui.hpp>
+#include <opencv4/opencv2/imgproc.hpp>
 #include <iostream>
 #include <math.h>
 #include "kernel.h"
@@ -7,6 +9,10 @@
 #include "contour.h"
 
 #define IMAGE_NAME0 "datas/square_sample.png"
+#define IMAGE_NAME1 "datas/Palpa1.jpg"
+#define IMAGE_NAME2 "datas/Palpa2.jpg"
+#define IMAGE_NAME3 "datas/mr_piuel.jpeg"
+#define IMAGE_NAME4 "datas/Lenna.png"
 #include "hough_line.h"
 
 int main(int argc, char *argv[])
@@ -42,12 +48,21 @@ int main(int argc, char *argv[])
 
   cv::Mat im_threshold = Seuil::seuil_global(amp0 * (1 / 255.0), 0.1);
 
-  HoughLine houghline(im_threshold, 7, 4);
+  HoughLine houghline(im_threshold, 200, 200);
   houghline.compute_accumulator();
-  std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(100);
+  cv::Mat acc = houghline.get_accumulator();
+  std::cout << "Accumulator : size = " << acc.rows << "x" << acc.cols << "\n";
+  std::cout << "imthreshold : size = " << im_threshold.rows << "x" << im_threshold.cols << "\n";
+
+  std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(1000.);
+  for (int i = 0; i < lines.size(); i++)
+  {
+      std::cout << "polar paramaters of line " << i << " : (" << lines[i].first << ", " << lines[i].second << ")\n";
+  }
   cv::Mat display = houghline.line_display_image(lines);
 
   cv::imshow("Lines in im", display);
+  cv::imshow("accumulator", acc* 0.001);
   cv::waitKey(0);
 
   return 0;

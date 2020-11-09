@@ -16,6 +16,7 @@ HoughLine::HoughLine(cv::Mat _im_threshold, int _n_theta, int _n_rho) : im_thres
 }
 
 HoughLine::~HoughLine() {}
+cv::Mat HoughLine::get_accumulator() {return accumulator;}
 
 //float rho, float theta
 void HoughLine::update_accumulator(Line_paremeters line_param)
@@ -73,7 +74,7 @@ Line_paremeters HoughLine::compute_line_parameters(Point i, Point j)
     float line_direction_norm = sqrt(pow(xj - xi, 2) + pow(yj - yi, 2));
     float signedrho = (xi * yj - xj * yi) / line_direction_norm;
     float xh = signedrho * (yj - yi) / line_direction_norm;
-    float yh = signedrho * (xj - xi) / line_direction_norm;
+    float yh = signedrho * (xi - xj) / line_direction_norm;
     // h est le point de la droite le plus proche de l'origine (0,0)
     // ses coord polaires sont (rho, theta), ses coord cartésiennes sont (xh, yh)
     float theta = std::atan2(yh, xh);
@@ -97,9 +98,9 @@ void HoughLine::compute_accumulator()
                     for (int jprim = 0; jprim < im_threshold.cols; jprim++)
                     {
 
-                        if (im_threshold.at<float>(iprim, jprim) > 0.5f && (iprim != i || jprim != j))
-                        {
-                            Line_paremeters line_param = compute_line_parameters({i, j}, {iprim, jprim});
+                        if ((iprim*im_threshold.cols+jprim > i*im_threshold.cols+j) && im_threshold.at<float>(iprim, jprim) > 0.5f)
+                        {// la première condition est pour assurer que l'on passe une seule et une fois par paire
+                            Line_paremeters line_param = compute_line_parameters({j, i}, {jprim, iprim});
                             update_accumulator(line_param);
                         }
                     }
@@ -135,7 +136,7 @@ std::vector<Line_paremeters> HoughLine::vote_threshold_local_maxima(float thresh
                 if (to_keep)
                 {
                     good_lines.push_back(
-                        Line_paremeters({thet * d_theta, rho * d_rho}));
+                        Line_paremeters({thet * d_theta - M_PI_2, rho * d_rho}));
                 }
             }
         }
@@ -145,19 +146,51 @@ std::vector<Line_paremeters> HoughLine::vote_threshold_local_maxima(float thresh
 
 cv::Mat HoughLine::line_display_image(std::vector<Line_paremeters> lines)
 {
+    float epsilon_rad = d_theta*0.5; // in radian
+    float epsilon_pix = 1.; // in pixel
     cv::Mat img = cv::Mat::zeros(im_threshold.rows, im_threshold.cols, CV_32F);
     for (int row = 0; row < im_threshold.rows; row++)
     {
         for (int col = 0; col < im_threshold.cols; col++)
         {
-            img.at<float>(row, col) = im_threshold.at<float>(row, col) * 0.5;
+            img.at<float>(row, col) = im_threshold.at<float>(row, col) * 0.0;
         }
     }
 
     for (int i = 0; i < lines.size(); i++)
     {
-        float xh = lines[i].second * cos(lines[i].first); // rho * cos(theta)
-        float yh = lines[i].second * sin(lines[i].first);
+        float xh = lines[i].second * cos(lines[i].first); // xh  = rho * cos(theta)
+        float yh = lines[i].second * sin(lines[i].first); // yh  = rho * sin(theta)
+        float line_direction_0 = lines[i].first+M_PI_2;
+
+        //critère 1
+        if (line_direction_0 > M_PI)
+            line_direction_0 -= 2*M_PI; // to have it in [-pi, pi] to compare to atan2
+        float line_direction_1 = lines[i].first-M_PI_2;// should be in [-pi, pi] since theta in [-pi/2,pi]
+
+
+        /*//critère2
+        float tandir = tan(lines[i].first+M_PI_2);
+        */
+
+        for (int row = 0; row < im_threshold.rows; row++)
+        {
+            for (int col = 0; col < im_threshold.cols; col++)
+            {
+                float y = row-yh;
+                float x = col-xh;
+
+                // critère 1
+                if (abs(std::atan2(y,x) - line_direction_0) < epsilon_rad || abs(std::atan2(y,x) - line_direction_1) < epsilon_rad )
+                    img.at<float>(row, col) += 0.3;
+
+
+                /*// critère 2
+                if ( abs(y - x*tandir) < epsilon_pix)
+                    img.at<float>(row, col) += 0.3;
+                */
+            }
+        }
     }
     return img;
 }

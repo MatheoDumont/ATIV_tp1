@@ -28,6 +28,7 @@ public:
      */
     HoughLine(cv::Mat _im_threshold, int n_theta, int n_rho);
     ~HoughLine();
+    cv::Mat get_accumulator();
     //Plan :
     /* It would be interesting to create structure of Line (+ Circle and
     * Segment) pour éviter de se trimballer des paires de paires de floats ou
