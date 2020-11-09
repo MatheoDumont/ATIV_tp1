@@ -70,13 +70,12 @@ Line_paremeters HoughLine::compute_line_parameters(Point i, Point j)
     // */
     // return Line_paremeters({theta, rho});
 
-    float line_direction_norm = sqrt(pow(xj - xi, 2) + pow(yj - yi, 2))
-    float signedrho = (xi * yj - xj * yi) / line_direction_norm;
-    float xh = signedrho * (yj-yi)/line_direction_norm;
-    float yh = signedrho * (xj-xi)/line_direction_norm;
+    float line_direction_norm = sqrt(pow(xj - xi, 2) + pow(yj - yi, 2)) float signedrho = (xi * yj - xj * yi) / line_direction_norm;
+    float xh = signedrho * (yj - yi) / line_direction_norm;
+    float yh = signedrho * (xj - xi) / line_direction_norm;
     // h est le point de la droite le plus proche de l'origine (0,0)
     // ses coord polaires sont (rho, theta), ses coord cartésiennes sont (xh, yh)
-    float theta = std::atan2(yh,xh);
+    float theta = std::atan2(yh, xh);
     //https://en.cppreference.com/w/cpp/numeric/math/atan2
     // atan2(y,x) -> angle of (x,y) in [-pi,pi]
     return Line_paremeters({theta, abs(signedrho)});
@@ -84,43 +83,48 @@ Line_paremeters HoughLine::compute_line_parameters(Point i, Point j)
 
 void HoughLine::compute_accumulator()
 {
-    for (int i = 0; i < im_threshold.rows; i++) {
-        for (int j = 0; j < im_threshold.cols; j++) {
+    for (int i = 0; i < im_threshold.rows; i++)
+    {
+        for (int j = 0; j < im_threshold.cols; j++)
+        {
 
-            if (im_threshold.at<float>(i, j) > 0.5f) {
+            if (im_threshold.at<float>(i, j) > 0.5f)
+            {
 
-                for (int iprim = 0; iprim < im_threshold.rows; iprim++) {
-                    for (int jprim = 0; jprim < im_threshold.cols; jprim++) {
+                for (int iprim = 0; iprim < im_threshold.rows; iprim++)
+                {
+                    for (int jprim = 0; jprim < im_threshold.cols; jprim++)
+                    {
 
-                        if (im_threshold.at<float>(iprim, jprim) > 0.5f && (iprim!=i || jprim !=j)) {
-                            Line_paremeters line_param = compute_line_parameters(iprm, jprim);
+                        if (im_threshold.at<float>(iprim, jprim) > 0.5f && (iprim != i || jprim != j))
+                        {
+                            Line_paremeters line_param = compute_line_parameters({i, j}, {iprim, jprim});
                             update_accumulator(line_param);
                         }
-
                     }
                 }
             }
-
         }
     }
 }
 
-std::vector<Line_paremeters> HoughLine::vote_threshold_local_maxima
-(float threshold, int radius)
+std::vector<Line_paremeters> HoughLine::vote_threshold_local_maxima(float threshold, int radius)
 {
     std::vector<Line_paremeters> good_lines;
 
     for (int thet = radius; thet < accumulator.rows - radius; thet++)
-    {for (int rho = radius; rho < accumulator.cols - radius; rho++)
+    {
+        for (int rho = radius; rho < accumulator.cols - radius; rho++)
         {
-            float vote_value = accumulator.at<float>(thet,rho);
+            float vote_value = accumulator.at<float>(thet, rho);
             bool to_keep = true;
             if (vote_value > threshold)
-            {// maybe a good line : verify if local maximum
+            { // maybe a good line : verify if local maximum
                 for (int i = -radius; i < radius + 1; i++)
-                {for (int j = -radius; j < radius + 1; j++)
+                {
+                    for (int j = -radius; j < radius + 1; j++)
                     {
-                        if (accumulator.at<float>(thet+i,rho+j) > vote_value)
+                        if (accumulator.at<float>(thet + i, rho + j) > vote_value)
                         {
                             to_keep = false;
                             break;
@@ -129,8 +133,8 @@ std::vector<Line_paremeters> HoughLine::vote_threshold_local_maxima
                 }
                 if (to_keep)
                 {
-                good_lines.push_back(
-                    Line_paremeters({thet*d_theta, rho*d_rho}));
+                    good_lines.push_back(
+                        Line_paremeters({thet * d_theta, rho * d_rho}));
                 }
             }
         }
@@ -140,24 +144,22 @@ std::vector<Line_paremeters> HoughLine::vote_threshold_local_maxima
 
 cv::Mat HoughLine::line_display_image(std::vector<Line_paremeters> lines)
 {
-  cv::Mat img=cv::Mat::zeros(im_threshold.rows,im_threshold.cols,CV_32F);
-  for (int row = 0; row < im_threshold.rows; row++)
+    cv::Mat img = cv::Mat::zeros(im_threshold.rows, im_threshold.cols, CV_32F);
+    for (int row = 0; row < im_threshold.rows; row++)
     {
-    for (int col = 0; col < im_threshold.cols; col++)
-      {
-          img.at<float>(row, col) = im_threshold.at<float>(row,col)*0.5;
-      }
+        for (int col = 0; col < im_threshold.cols; col++)
+        {
+            img.at<float>(row, col) = im_threshold.at<float>(row, col) * 0.5;
+        }
     }
 
-    for (int i = 0; i < lines.size() ; i ++)
+    for (int i = 0; i < lines.size(); i++)
     {
-        float xh = lines[i].second * cos(lines[i].first);// rho * cos(theta)
+        float xh = lines[i].second * cos(lines[i].first); // rho * cos(theta)
         float yh = lines[i].second * sin(lines[i].first);
-
     }
-  return img;
+    return img;
 }
-
 
 // cv::Mat Hough::accumulator_line(cv::Mat image, int N_rho, int N_theta)
 // {
