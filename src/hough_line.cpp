@@ -70,7 +70,8 @@ Line_paremeters HoughLine::compute_line_parameters(Point i, Point j)
     // */
     // return Line_paremeters({theta, rho});
 
-    float line_direction_norm = sqrt(pow(xj - xi, 2) + pow(yj - yi, 2)) float signedrho = (xi * yj - xj * yi) / line_direction_norm;
+    float line_direction_norm = sqrt(pow(xj - xi, 2) + pow(yj - yi, 2));
+    float signedrho = (xi * yj - xj * yi) / line_direction_norm;
     float xh = signedrho * (yj - yi) / line_direction_norm;
     float yh = signedrho * (xj - xi) / line_direction_norm;
     // h est le point de la droite le plus proche de l'origine (0,0)
