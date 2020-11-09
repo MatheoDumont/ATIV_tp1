@@ -7,19 +7,26 @@
 #include "math.h"
 
 // typedef std::pair<std::pair<int, int>, std::pair<int, int>> Segment;
+// Line_paremeters({theta, rho})
 typedef std::pair<float, float> Line_paremeters;
+// Point({x, y})
 typedef std::pair<int, int> Point;
 
 class HoughLine
 {
 private:
-    cv::Mat image;
+
+    cv::Mat im_threshold;
     int n_theta, n_rho;
     float d_theta, d_rho;
     cv::Mat accumulator;
 
 public:
-    HoughLine(cv::Mat image, int n_theta, int n_rho);
+    /*
+     * Takes as input :
+     * cv::Mat im_threshold :
+     */
+    HoughLine(cv::Mat _im_threshold, int n_theta, int n_rho);
     ~HoughLine();
     //Plan :
     /* It would be interesting to create structure of Line (+ Circle and
@@ -55,24 +62,32 @@ public:
     // cv::Mat accumulator_line(cv::Mat image, int N_rho, int N_theta);
     // cv::Mat create_accumulator();
 
+    /*
+     * Compute the parameters of the line defined with the Points i and j.
+     * Returns a Line_paremeters which consist of :
+     * ```cpp
+     * Line_paremeters line_param = compute_line_parameters(..., ...);
+     * line_param.first == theta;
+     * line_param.second == rho;
+     */
     Line_paremeters compute_line_parameters(Point i, Point j);
 
     /*
-     * Vote for rho and theta by rounding to the closer index.
+     * Takes in a line_parameters `object` and
+     * vote for rho and theta by rounding to the closer index.
      */
-    // void vote_accumulator_lines(cv::Mat &accumulator, float rho, float theta);
-    void vote_accumulator(float rho, float theta);
+    void update_accumulator(Line_paremeters line_param);
 
     /*
-    * Compute accumulator of a line, with polar coordinates, from a list
-    * of points.
-    * Returns a matrice of size (N_rho,N_theta)
+    * Compute accumulator of a line, with polar coordinates.
+    * //Returns a matrice of size (N_rho, N_theta)
     * theta \in [-pi/2,pi] (dtheta = 3pi/(2*N_theta))
     * rho   \in [0, sqrt(H*H+W*W)] (drho = sqrt(H*H+W*W)/N_rho)
     */
     // cv::Mat accumulator_line_list(std::vector<std::pair<int, int>> list_of_points,
     //                               int N_rho, int N_theta,
     //                               int H, int W);
+    void compute_accumulator();
 
     //=================
     /* Vote
@@ -82,8 +97,8 @@ public:
     /*
     * Keep the lines that are local maximas above a threshold.
     */
-    // std::vector<std::pair<float, float>> vote_maxima_locaux(cv::Mat accumulator,
-    //                                                         float threshold);
+    std::vector<Line_paremeters> vote_threshold_local_maxima
+    (float threshold, int radius = 1);
 
     /*
     * Apply a mean filter on the accumulator and keep the lines that are local
@@ -121,5 +136,9 @@ public:
     * Search for segment bounds.
     */
     // std::vector<Segment> find_line_bounds(std::vector<std::pair<float, float>> lines, cv::Mat image);
+
+    //=================
+    /* In order to display the lines we found */
+    cv::Mat line_display_image(std::vector<Line_paremeters> lines);
 };
 #endif
