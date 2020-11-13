@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
   std::cout << "Accumulator : size = " << acc.rows << "x" << acc.cols << "\n";
   std::cout << "imthreshold : size = " << im_threshold.rows << "x" << im_threshold.cols << "\n";
 
-  std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(1000.);
+  std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(1000., 5);
   for (int i = 0; i < lines.size(); i++)
   {
       std::cout << "polar paramaters of line " << i << " : (" << lines[i].first << ", " << lines[i].second << ")\n";
