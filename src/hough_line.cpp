@@ -16,7 +16,7 @@ HoughLine::HoughLine(cv::Mat _im_threshold, int _n_theta, int _n_rho) : im_thres
 }
 
 HoughLine::~HoughLine() {}
-cv::Mat HoughLine::get_accumulator() {return accumulator;}
+cv::Mat HoughLine::get_accumulator() { return accumulator; }
 
 //float rho, float theta
 void HoughLine::update_accumulator(Line_paremeters line_param)
@@ -98,8 +98,8 @@ void HoughLine::compute_accumulator()
                     for (int jprim = 0; jprim < im_threshold.cols; jprim++)
                     {
 
-                        if ((iprim*im_threshold.cols+jprim > i*im_threshold.cols+j) && im_threshold.at<float>(iprim, jprim) > 0.5f)
-                        {// la première condition est pour assurer que l'on passe une seule et une fois par paire
+                        if ((iprim * im_threshold.cols + jprim > i * im_threshold.cols + j) && im_threshold.at<float>(iprim, jprim) > 0.5f)
+                        { // la première condition est pour assurer que l'on passe une seule et une fois par paire
                             Line_paremeters line_param = compute_line_parameters({j, i}, {jprim, iprim});
                             update_accumulator(line_param);
                         }
@@ -146,8 +146,8 @@ std::vector<Line_paremeters> HoughLine::vote_threshold_local_maxima(float thresh
 
 cv::Mat HoughLine::line_display_image(std::vector<Line_paremeters> lines)
 {
-    float epsilon_rad = d_theta*0.5; // in radian
-    float epsilon_pix = 1.; // in pixel
+    float epsilon_rad = d_theta * 0.5; // in radian
+    float epsilon_pix = 1.;            // in pixel
     cv::Mat img = cv::Mat::zeros(im_threshold.rows, im_threshold.cols, CV_32F);
     for (int row = 0; row < im_threshold.rows; row++)
     {
@@ -156,12 +156,12 @@ cv::Mat HoughLine::line_display_image(std::vector<Line_paremeters> lines)
             img.at<float>(row, col) = im_threshold.at<float>(row, col) * 0.0;
         }
     }
-
+    
     for (int i = 0; i < lines.size(); i++)
     {
         float xh = lines[i].second * cos(lines[i].first); // xh  = rho * cos(theta)
         float yh = lines[i].second * sin(lines[i].first); // yh  = rho * sin(theta)
-        float line_direction_0 = lines[i].first+M_PI_2;
+        float line_direction_0 = lines[i].first + M_PI_2;
         /*
         //critère 1
         if (line_direction_0 > M_PI)
@@ -170,16 +170,15 @@ cv::Mat HoughLine::line_display_image(std::vector<Line_paremeters> lines)
         */
 
         //critère2
-        float tandir = tan(lines[i].first+M_PI_2);
-        float invtandir = 1./tandir;
-
+        float tandir = tan(lines[i].first + M_PI_2);
+        float invtandir = 1. / tandir;
 
         for (int row = 0; row < im_threshold.rows; row++)
         {
             for (int col = 0; col < im_threshold.cols; col++)
             {
-                float y = row-yh;
-                float x = col-xh;
+                float y = row - yh;
+                float x = col - xh;
 
                 /*
                 // critère 1
@@ -188,9 +187,8 @@ cv::Mat HoughLine::line_display_image(std::vector<Line_paremeters> lines)
                 */
 
                 // critère 2
-                if ( abs(y - x*tandir) < epsilon_pix || abs(x - y*invtandir) < epsilon_pix )
+                if (abs(y - x * tandir) < epsilon_pix || abs(x - y * invtandir) < epsilon_pix)
                     img.at<float>(row, col) += 0.3;
-
             }
         }
     }
