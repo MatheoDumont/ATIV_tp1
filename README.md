@@ -1,4 +1,4 @@
-# ATIV_tp1
+# TPS d'Analyse et Traitement d'Image 
 
 Dépot pour le premier tp d'Analyse d'Image du master ID3D pour le groupe formé par *Yann-Situ Gazull* et *Mathéo Dumont*.
 Notre rapport (en anglais) se trouve [ici](TP1_ATIV.pdf).
