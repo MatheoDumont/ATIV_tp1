@@ -85,29 +85,21 @@ Line_paremeters HoughLine::compute_line_parameters(Point i, Point j)
 
 void HoughLine::compute_accumulator()
 {
-    for (int i = 0; i < im_threshold.rows; i++)
-    {
-        for (int j = 0; j < im_threshold.cols; j++)
-        {
+    for (int row = 0; row < im_threshold.rows; row++)
+        for (int col = 0; col < im_threshold.cols; col++)
 
-            if (im_threshold.at<float>(i, j) > 0.5f)
-            {
+            if (im_threshold.at<float>(row, col) > 0.5f)
+                for (int rowprim = 0; rowprim < im_threshold.rows; rowprim++)
+                    for (int colprim = 0; colprim < im_threshold.cols; colprim++)
 
-                for (int iprim = 0; iprim < im_threshold.rows; iprim++)
-                {
-                    for (int jprim = 0; jprim < im_threshold.cols; jprim++)
-                    {
-
-                        if ((iprim * im_threshold.cols + jprim > i * im_threshold.cols + j) && im_threshold.at<float>(iprim, jprim) > 0.5f)
+                        if ((rowprim * im_threshold.cols + colprim > row * im_threshold.cols + col) &&
+                            im_threshold.at<float>(rowprim, colprim) > 0.5f)
                         { // la première condition est pour assurer que l'on passe une seule et une fois par paire
-                            Line_paremeters line_param = compute_line_parameters({j, i}, {jprim, iprim});
+                            Line_paremeters line_param = compute_line_parameters({col, row}, {colprim, rowprim});
+                            // Line_paremeters line_param = compute_line_parameters({row, col}, {rowprim, colprim});
+
                             update_accumulator(line_param);
                         }
-                    }
-                }
-            }
-        }
-    }
 }
 
 std::vector<Line_paremeters> HoughLine::vote_threshold_local_maxima(float threshold, int radius)
@@ -153,10 +145,10 @@ cv::Mat HoughLine::line_display_image(std::vector<Line_paremeters> lines)
     {
         for (int col = 0; col < im_threshold.cols; col++)
         {
-            img.at<float>(row, col) = im_threshold.at<float>(row, col) * 0.0;
+            img.at<float>(row, col) = im_threshold.at<float>(row, col) * 0.1;
         }
     }
-    
+
     for (int i = 0; i < lines.size(); i++)
     {
         float xh = lines[i].second * cos(lines[i].first); // xh  = rho * cos(theta)
