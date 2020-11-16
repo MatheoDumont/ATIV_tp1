@@ -1,4 +1,4 @@
-# TPs d'Analyse et Traitement d'Image 
+# TPs d'Analyse Traitement Vision 3D
 
 Dépot pour le premier tp d'Analyse d'Image du master ID3D pour le groupe formé par *Yann-Situ Gazull* et *Mathéo Dumont*.
 Notre rapport (en anglais) se trouve [ici](rapport_tp1.pdf).
