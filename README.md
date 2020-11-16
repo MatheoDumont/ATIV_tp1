@@ -1,7 +1,7 @@
 # TPs d'Analyse et Traitement d'Image 
 
 Dépot pour le premier tp d'Analyse d'Image du master ID3D pour le groupe formé par *Yann-Situ Gazull* et *Mathéo Dumont*.
-Notre rapport (en anglais) se trouve [ici](TP1_ATIV.pdf).
+Notre rapport (en anglais) se trouve [ici](rapport_tp1.pdf).
 
 # Compilation
 Pour compiler, vous devrez avoir `cmake` ainsi que `opencv 4.2` installé.
