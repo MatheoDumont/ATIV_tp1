@@ -8,7 +8,7 @@
 #include "path_contour.h"
 #include "contour.h"
 
-#define IMAGE_NAME0 "datas/square_sample.png"
+#define IMAGE_NAME0 "datas/square_sample_0.png"
 #define IMAGE_NAME1 "datas/Palpa1.jpg"
 #define IMAGE_NAME2 "datas/Palpa2.jpg"
 #define IMAGE_NAME3 "datas/mr_piuel.jpeg"
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     std::cout << "Accumulator : size = " << acc.rows << "x" << acc.cols << "\n";
     std::cout << "imthreshold : size = " << im_threshold.rows << "x" << im_threshold.cols << "\n";
 
-    std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(1000., 5);
+    std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(0.0005, 5);
     for (int i = 0; i < lines.size(); i++)
     {
         std::cout << "polar paramaters of line " << i << " : (" << lines[i].first << ", " << lines[i].second << ")\n";
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     cv::Mat display = houghline.line_display_image(lines);
 
     cv::imshow("Lines in im", display);
-    cv::imshow("accumulator", acc * 0.001);
+    cv::imshow("accumulator", acc*2000);
     cv::waitKey(0);
 
     return 0;

@@ -15,7 +15,7 @@ HoughCercle::HoughCercle(cv::Mat im_threshold,
 
     for (int row = 0; row < im_threshold.rows; row++)
         for (int col = 0; col < im_threshold.cols; col++)
-            if (im_threshold.at<float>(col, row) > 0.5f)
+            if (im_threshold.at<float>(row, col) > 0.5f)
                 contours.push_back(Point(col, row, 0.0));
 
     accumulator_vote_value = 1.0 / contours.size();

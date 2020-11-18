@@ -37,7 +37,7 @@ include_directories(
 set(TP1 "tp1")
 
 add_executable(
-  TP1 
+  TP1
   mains/tp1.cpp
 )
 
@@ -49,7 +49,7 @@ target_link_libraries(
 
 set(TP2 "tp2")
 add_executable(
-  TP2 
+  TP2
   mains/tp2.cpp
 )
 
@@ -62,6 +62,12 @@ target_link_libraries(
 
 configure_file(
   datas/square_sample_0.png ${CMAKE_CURRENT_BINARY_DIR}/datas/square_sample_0.png COPYONLY
+)
+configure_file(
+  datas/square_sample_1.png ${CMAKE_CURRENT_BINARY_DIR}/datas/square_sample_1.png COPYONLY
+)
+configure_file(
+  datas/square_sample_2.png ${CMAKE_CURRENT_BINARY_DIR}/datas/square_sample_2.png COPYONLY
 )
 configure_file(
   datas/square_sample.png ${CMAKE_CURRENT_BINARY_DIR}/datas/square_sample.png COPYONLY
@@ -78,4 +84,3 @@ configure_file(
 configure_file(
   datas/Lenna.png ${CMAKE_CURRENT_BINARY_DIR}/datas/Lenna.png COPYONLY
 )
-

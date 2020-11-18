@@ -5,21 +5,26 @@
 #define HOUGH_H
 #include <opencv4/opencv2/core.hpp>
 #include "math.h"
+#include "point.h"
+#include <vector>
 
 // typedef std::pair<std::pair<int, int>, std::pair<int, int>> Segment;
 // Line_paremeters({theta, rho})
 typedef std::pair<float, float> Line_paremeters;
 // Point({x, y})
-typedef std::pair<int, int> Point;
+//typedef std::pair<int, int> Point; // defined in point.h
 
 class HoughLine
 {
 private:
 
-    cv::Mat im_threshold;
+    cv::Mat accumulator;
+    std::vector<Point> contours;
+
+    int rows, cols;
     int n_theta, n_rho;
     float d_theta, d_rho;
-    cv::Mat accumulator;
+    float accumulator_vote_value;
 
 public:
     /*
@@ -141,5 +146,6 @@ public:
     //=================
     /* In order to display the lines we found */
     cv::Mat line_display_image(std::vector<Line_paremeters> lines);
+    cv::Mat segment_display_image(std::vector<Line_paremeters> lines);
 };
 #endif
