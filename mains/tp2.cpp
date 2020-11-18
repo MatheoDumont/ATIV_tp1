@@ -8,7 +8,7 @@
 #include "path_contour.h"
 #include "contour.h"
 
-#define IMAGE_NAME0 "datas/square_sample_0.png"
+#define IMAGE_NAME0 "datas/square_sample.png"
 #define IMAGE_NAME1 "datas/Palpa1.jpg"
 #define IMAGE_NAME2 "datas/Palpa2.jpg"
 #define IMAGE_NAME3 "datas/mr_piuel.jpeg"
@@ -59,9 +59,11 @@ int main(int argc, char *argv[])
     {
         std::cout << "polar paramaters of line " << i << " : (" << lines[i].first << ", " << lines[i].second << ")\n";
     }
-    cv::Mat display = houghline.line_display_image(lines);
+    cv::Mat display0 = houghline.line_display_image(lines);
+    //cv::Mat display1 = houghline.segment_display_image(lines);
 
-    cv::imshow("Lines in im", display);
+    cv::imshow("Lines in im", display0);
+    //cv::imshow("Segments in im", display1);
     cv::imshow("accumulator", acc*2000);
     cv::waitKey(0);
 

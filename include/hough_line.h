@@ -11,8 +11,10 @@
 // typedef std::pair<std::pair<int, int>, std::pair<int, int>> Segment;
 // Line_paremeters({theta, rho})
 typedef std::pair<float, float> Line_paremeters;
-// Point({x, y})
-//typedef std::pair<int, int> Point; // defined in point.h
+typedef Line_paremeters Vote_paremeters;
+/* Vote_paremeters could be pair<Line_paremeters, float>, in order to keep
+ * the vote value to display it.
+ */
 
 class HoughLine
 {
@@ -103,7 +105,7 @@ public:
     /*
     * Keep the lines that are local maximas above a threshold.
     */
-    std::vector<Line_paremeters> vote_threshold_local_maxima
+    std::vector<Vote_paremeters> vote_threshold_local_maxima
     (float threshold, int radius = 1);
 
     /*
@@ -145,7 +147,7 @@ public:
 
     //=================
     /* In order to display the lines we found */
-    cv::Mat line_display_image(std::vector<Line_paremeters> lines);
-    cv::Mat segment_display_image(std::vector<Line_paremeters> lines);
+    cv::Mat line_display_image(std::vector<Vote_paremeters> lines);
+    cv::Mat segment_display_image(std::vector<Vote_paremeters> lines);
 };
 #endif

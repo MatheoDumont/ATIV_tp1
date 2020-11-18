@@ -92,9 +92,9 @@ void HoughLine::compute_accumulator()
         }
 }
 
-std::vector<Line_paremeters> HoughLine::vote_threshold_local_maxima(float threshold, int radius)
+std::vector<Vote_paremeters> HoughLine::vote_threshold_local_maxima(float threshold, int radius)
 {
-    std::vector<Line_paremeters> good_lines;
+    std::vector<Vote_paremeters> good_lines;
 
     for (int thet = radius; thet < accumulator.rows - radius; thet++)
     {
@@ -122,7 +122,7 @@ std::vector<Line_paremeters> HoughLine::vote_threshold_local_maxima(float thresh
                 if (to_keep)
                 {
                     good_lines.push_back(
-                        Line_paremeters({thet * d_theta - M_PI_2, rho * d_rho}));
+                        Vote_paremeters({thet * d_theta - M_PI_2, rho * d_rho}));
                 }
             }
         }
@@ -130,10 +130,17 @@ std::vector<Line_paremeters> HoughLine::vote_threshold_local_maxima(float thresh
     return good_lines;
 }
 
-cv::Mat HoughLine::line_display_image(std::vector<Line_paremeters> lines)
+/*----------------------display------------------------- */
+bool critere(Point u, float epsilon, float tandir, float invtandir)
+{
+    return ((abs(u._y - u._x * tandir) < epsilon ||
+    abs(u._x - u._y * invtandir) < epsilon));
+}
+
+cv::Mat HoughLine::line_display_image(std::vector<Vote_paremeters> lines)
 {
     float epsilon_rad = d_theta * 0.5; // in radian
-    float epsilon_pix = 1.;            // in pixel
+    float epsilon_pix = 0.7;            // in pixel
     cv::Mat img = cv::Mat::zeros(rows, cols, CV_32F);
     for (int i = 0; i < contours.size(); i++)
     {
@@ -178,49 +185,62 @@ cv::Mat HoughLine::line_display_image(std::vector<Line_paremeters> lines)
     return img;
 }
 
-cv::Mat HoughLine::segment_display_image(std::vector<Line_paremeters> lines)
-{
+cv::Mat HoughLine::segment_display_image(std::vector<Vote_paremeters> lines)
+{// doesn't really work...
     float epsilon_rad = d_theta * 0.5; // in radian
-    float epsilon_pix = 1.;            // in pixel
+    float epsilon_pix = 0.7;            // in pixel
     cv::Mat img = cv::Mat::zeros(rows, cols, CV_32F);
     for (int i = 0; i < contours.size(); i++)
     {
-        img.at<float>(contours[i]._y, contours[i]._x) = 0.2;
+        img.at<float>(contours[i]._y, contours[i]._x) = 0.0;
     }
 
 
     for (int i = 0; i < lines.size(); i++)
     {
-        float xh = lines[i].second * cos(lines[i].first); // xh  = rho * cos(theta)
-        float yh = lines[i].second * sin(lines[i].first); // yh  = rho * sin(theta)
+        Point h = Point(lines[i].second * cos(lines[i].first),lines[i].second * sin(lines[i].first), 0.0);
+        // xh  = rho * cos(theta)
+        // yh  = rho * sin(theta)
         float line_direction_0 = lines[i].first + M_PI_2;
-        /*
-        //critère 1
-        if (line_direction_0 > M_PI)
-            line_direction_0 -= 2*M_PI; // to have it in [-pi, pi] to compare to atan2
-        float line_direction_1 = lines[i].first-M_PI_2;// should be in [-pi, pi] since theta in [-pi/2,pi]
-        */
 
-        //critère2
+        //use critere
         float tandir = tan(lines[i].first + M_PI_2);
         float invtandir = 1. / tandir;
 
-        for (int row = 0; row < rows; row++)
+
+        float row_beg = 0., col_beg = 0.;
+        float row_end = rows-1, col_end = cols-1;
+        int j = 0;
+        while (j < contours.size() &&
+               !critere(contours[j] - h, epsilon_pix, tandir, invtandir))
+        {j++;} // find first point of the line in the contour
+        if (j < contours.size())
+        { row_beg = contours[j]._y; col_beg = contours[j]._x; }
+
+        j = contours.size()-1;
+        while (j >= 0 &&
+               !critere(contours[j] - h, epsilon_pix, tandir, invtandir))
+        {j--;} // find last point of the line in the contour
+        if (j >= 0)
+        { row_end = contours[j]._y; col_end = contours[j]._x;}
+
+        //std::cout << i <<" : DEBEND : " << row_beg << " " << row_end << " " << col_beg << " " << col_end << "\n";
+
+        int row_init = std::max((int)std::min(row_beg, row_end)-1,0);
+        int col_init = std::max((int)std::min(col_beg, col_end)-1,0);
+        int row_fina = std::min((int)std::max(row_beg, row_end)+1,rows-1);
+        int col_fina = std::min((int)std::max(col_beg, col_end)+1,cols-1);
+        //std::cout << "  : INIFIN : " << row_init << " " << row_fina << " " << col_init << " " << col_fina << "\n";
+
+        // begin images loop in rectangle {row_beg,row_end,col_beg,col_end}
+        for (int row = row_init; row < row_fina+1; row++)
         {
-            for (int col = 0; col < cols; col++)
+            for (int col = col_init; col < col_fina+1; col++)
             {
-                float y = row - yh;
-                float x = col - xh;
-
-                /*
-                // critère 1
-                if (abs(std::atan2(y,x) - line_direction_0) < epsilon_rad || abs(std::atan2(y,x) - line_direction_1) < epsilon_rad )
-                    img.at<float>(row, col) += 0.3;
-                */
-
-                // critère 2
-                if (abs(y - x * tandir) < epsilon_pix || abs(x - y * invtandir) < epsilon_pix)
-                    img.at<float>(row, col) += 0.3;
+                Point u = Point(1.0*col, 1.0*row, 0.0) - h;
+                // critère
+                if (critere(u, epsilon_pix, tandir, invtandir))
+                    img.at<float>(row, col) += 0.5;
             }
         }
     }
