@@ -18,9 +18,12 @@ HoughCercle::HoughCercle(cv::Mat im_threshold,
             if (im_threshold.at<float>(col, row) > 0.5f)
                 contours.push_back(Point(col, row, 0.0));
 
-    accumulator_vote_value = 1.0 / contours.size();
-    // accumulator = cv::Mat(3, {n_x, n_y, n_r}, CV_32F);
-    accumulator = cv::Mat(cv::Vec3i(n_x, n_y, n_r), CV_32F);
+    accumulator_vote_value = 6.0 / (contours.size()*(contours.size()-1)*(contours.size()-2));
+    int dims[] = {n_x, n_y, n_r};
+    accumulator = cv::Mat(3, dims, CV_32F);
+    //accumulator = cv::Mat(cv::Vec3i(n_x, n_y, n_r), CV_32F);
+    std::cout << "accumulator size : "<< accumulator.size << "\n";
+    std::cout << "contour size : " << contours.size() << "\n";
 }
 
 Point HoughCercle::circumscribed_triangle_circle(Point x, Point y, Point z)
@@ -86,32 +89,40 @@ int clamp(int min, int max, int val)
 
 void HoughCercle::update_accumulator(Cercle_parameters cercle_param)
 {
-    int idx_x = clamp(0, n_x, std::round(std::get<0>(cercle_param) / d_x));
-    int idx_y = clamp(0, n_y, std::round(std::get<1>(cercle_param) / d_y));
-    int idx_r = clamp(0, n_r, std::round(std::get<2>(cercle_param) / d_r));
+    int idx_x = clamp(0, n_x-1, std::round(std::get<0>(cercle_param) / d_x));
+    int idx_y = clamp(0, n_y-1, std::round(std::get<1>(cercle_param) / d_y));
+    int idx_r = clamp(0, n_r-1, (std::round(std::get<2>(cercle_param)-rad_min) / d_r));
 
-    accumulator.at<float>(idx_x, idx_y, idx_r);
+    accumulator.at<float>(idx_x, idx_y, idx_r) += accumulator_vote_value;
 }
 
 void HoughCercle::compute_accumulator()
 {
     // pour chaque triplet de points du contour
     for (int i1 = 0; i1 < contours.size() - 2; i1++)
+    {
         for (int i2 = i1 + 1; i2 < contours.size() - 1; i2++)
+        {
             for (int i3 = i2 + 1; i3 < contours.size(); i3++)
             {
                 Cercle_parameters cercle_param = compute_cercle_parameters(
                     contours[i1], contours[i2], contours[i3]);
                 update_accumulator(cercle_param);
             }
+        }
+        std::cout << "compute : i1 = "<< i1 << "\n";
+    }
+    std::cout << "END compute Accumulator" << "\n";
 }
 
 std::vector<Cercle_parameters> HoughCercle::vote_threshold_local_maxima(float threshold, int radius)
 {
     std::vector<Cercle_parameters> good_cercles;
-
+    std::cout << "BEGIN Vote" << "\n";
     for (int ix = radius; ix < accumulator.size[0] - radius; ix++)
+    {
         for (int iy = radius; iy < accumulator.size[1] - radius; iy++)
+        {
             for (int ir = radius; ir < accumulator.size[2] - radius; ir++)
             {
 
@@ -151,16 +162,21 @@ std::vector<Cercle_parameters> HoughCercle::vote_threshold_local_maxima(float th
                     }
                 }
             }
+
+        }
+        std::cout << "vote : ix = "<< ix << "\n";
+    }
+    std::cout << "END Vote" << "\n";
     return good_cercles;
 }
 
 cv::Mat HoughCercle::cercle_display_image(std::vector<Cercle_parameters> cercles)
 {
-    cv::Mat im = cv::Mat(rows, cols, CV_32F);
+    cv::Mat im = cv::Mat::zeros(rows, cols, CV_32F);
     int step = 5;
 
     for (int i = 0; i < cercles.size(); i++)
-    {   
+    {
         // parametres du cercles avec (x, y) le centre
         float x = std::get<0>(cercles[i]);
         float y = std::get<1>(cercles[i]);
@@ -173,6 +189,6 @@ cv::Mat HoughCercle::cercle_display_image(std::vector<Cercle_parameters> cercles
             border = rotation2D(border, angle);
         }
     }
-    
+
     return im;
 }

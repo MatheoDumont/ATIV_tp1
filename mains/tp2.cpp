@@ -14,6 +14,8 @@
 #define IMAGE_NAME3 "datas/mr_piuel.jpeg"
 #define IMAGE_NAME4 "datas/Lenna.png"
 #define IMAGE_NAME5 "datas/circle_sample_0.png"
+#define IMAGE_NAME6 "datas/circle_sample_1.png"
+#define IMAGE_NAME7 "datas/circle_sample_2.png"
 #include "hough_line.h"
 #include "hough_cercle.h"
 
@@ -33,7 +35,7 @@ int main(int argc, char *argv[])
     cv::Mat greyscale_image;
     cv::Mat im;
     if (argc < 2)
-        im = cv::imread(IMAGE_NAME5);
+        im = cv::imread(IMAGE_NAME7);
     else
         im = cv::imread(argv[1]);
 
@@ -49,6 +51,8 @@ int main(int argc, char *argv[])
     dir = Kernel::angle(gradient_convol);
 
     cv::Mat im_threshold = Seuil::seuil_global(amp0 * (1 / 255.0), 0.1);
+    //cv::imshow("im thresh", im_threshold);
+    //cv::waitKey(0);
 
     // HoughLine houghline(im_threshold, 200, 200);
     // houghline.compute_accumulator();
@@ -69,15 +73,31 @@ int main(int argc, char *argv[])
     // cv::imshow("accumulator", acc * 2000);
     // cv::waitKey(0);
 
-    HoughCercle houghcercle(im_threshold, 0.f, 1000.f, 5, 5, 5);
+    HoughCercle houghcercle(im_threshold, 10.f, 25.f, 50, 50, 15);
     houghcercle.compute_accumulator();
-    cv::imshow("accumulator", houghcercle.accumulator * 2000);
-    cv::waitKey(0);
+    //cv::imshow("accumulator", houghcercle.accumulator * 2000); impossible to visalize the accumulator haha
+    //cv::waitKey(0);
+    std::cout << "accumulator size : "<< houghcercle.accumulator.size[0] << "x"<< houghcercle.accumulator.size[1] << "x"<< houghcercle.accumulator.size[2]<< "\n";
+    std::cout << "accumulator size : "<< houghcercle.accumulator.size << "\n";
+    // for (int ix = 0; ix < houghcercle.accumulator.size[0] - 0; ix++)
+    // {
+    //     for (int iy = 0; iy < houghcercle.accumulator.size[1] - 0; iy++)
+    //     {
+    //         for (int ir = 0; ir < houghcercle.accumulator.size[2] - 0; ir++)
+    //         {
+    //             std::cout << houghcercle.accumulator.at<float>(ix,iy,ir) << "\t";
+    //         }
+    //     }
+    // }
 
-    std::vector<Cercle_parameters> cercles = houghcercle.vote_threshold_local_maxima(0.0005, 1);
+    std::vector<Cercle_parameters> cercles = houghcercle.vote_threshold_local_maxima(0.00005, 1);
+    std::cout << "cercles.size() : " << cercles.size() << "\n";
+    for (int i = 0; i < cercles.size(); i++)
+    {
+        std::cout << "Cercle paramaters " << i << " : (" << std::get<0>(cercles[i]) << ", " << std::get<1>(cercles[i]) << ", " << std::get<2>(cercles[i]) << ")\n";
+    }
 
     cv::Mat display1 = houghcercle.cercle_display_image(cercles);
-
     cv::imshow("cercle in im0", display1);
     cv::waitKey(0);
 

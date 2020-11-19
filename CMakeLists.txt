@@ -75,6 +75,12 @@ configure_file(
 configure_file(
   datas/circle_sample_0.png ${CMAKE_CURRENT_BINARY_DIR}/datas/circle_sample_0.png COPYONLY
 )
+configure_file(
+  datas/circle_sample_1.png ${CMAKE_CURRENT_BINARY_DIR}/datas/circle_sample_1.png COPYONLY
+)
+configure_file(
+  datas/circle_sample_2.png ${CMAKE_CURRENT_BINARY_DIR}/datas/circle_sample_2.png COPYONLY
+)
 
 
 configure_file(
