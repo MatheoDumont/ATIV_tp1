@@ -15,7 +15,7 @@ HoughCercle::HoughCercle(cv::Mat im_threshold,
 
     for (int row = 0; row < im_threshold.rows; row++)
         for (int col = 0; col < im_threshold.cols; col++)
-            if (im_threshold.at<float>(row, col) > 0.5f)
+            if (im_threshold.at<float>(col, row) > 0.5f)
                 contours.push_back(Point(col, row, 0.0));
 
     accumulator_vote_value = 1.0 / contours.size();
@@ -157,5 +157,22 @@ std::vector<Cercle_parameters> HoughCercle::vote_threshold_local_maxima(float th
 cv::Mat HoughCercle::cercle_display_image(std::vector<Cercle_parameters> cercles)
 {
     cv::Mat im = cv::Mat(rows, cols, CV_32F);
+    int step = 5;
+
+    for (int i = 0; i < cercles.size(); i++)
+    {   
+        // parametres du cercles avec (x, y) le centre
+        float x = std::get<0>(cercles[i]);
+        float y = std::get<1>(cercles[i]);
+        float radius = std::get<2>(cercles[i]);
+        Point border(radius, 0., 0.);
+
+        for (int angle = 0; angle < 360; angle+=step)
+        {
+            im.at<float>(std::round(x + border._x), std::round(y + border._y)) = 1.f;
+            border = rotation2D(border, angle);
+        }
+    }
+    
     return im;
 }

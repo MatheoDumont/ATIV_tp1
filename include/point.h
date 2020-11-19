@@ -32,6 +32,7 @@ float norm(const Point &p);
 Point normalize(const Point &p);
 float dot(const Point &p1, const Point &p2);
 Point cross(const Point &p1, const Point &p2);
+Point rotation2D(const Point &p1, float angle);
 
 std::ostream &operator<<(std::ostream &o, const Point &p);
 #endif

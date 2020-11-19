@@ -6,12 +6,12 @@
 #include "point.h"
 #include <vector>
 
+// std::tuple<x, y, radius>, parameters of the cercle, (x, y) is the center.
 typedef std::tuple<float, float, float> Cercle_parameters;
 
 class HoughCercle
 {
 private:
-    cv::Mat accumulator;
     std::vector<Point> contours;
 
     int rows, cols;
@@ -21,11 +21,13 @@ private:
     float accumulator_vote_value;
 
 public:
+    cv::Mat accumulator;
+
     HoughCercle(
         cv::Mat im_threshold,
         float _rad_min, float _rad_max,
         int _n_x, int _n_y, int _n_r);
-    ~HoughCercle();
+    // ~HoughCercle();
 
     Point circumscribed_triangle_circle(Point x, Point y, Point z);
     Cercle_parameters compute_cercle_parameters(Point x, Point y, Point z);

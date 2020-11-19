@@ -13,7 +13,9 @@
 #define IMAGE_NAME2 "datas/Palpa2.jpg"
 #define IMAGE_NAME3 "datas/mr_piuel.jpeg"
 #define IMAGE_NAME4 "datas/Lenna.png"
+#define IMAGE_NAME5 "datas/circle_sample_0.png"
 #include "hough_line.h"
+#include "hough_cercle.h"
 
 int main(int argc, char *argv[])
 {
@@ -31,7 +33,7 @@ int main(int argc, char *argv[])
     cv::Mat greyscale_image;
     cv::Mat im;
     if (argc < 2)
-        im = cv::imread(IMAGE_NAME0);
+        im = cv::imread(IMAGE_NAME5);
     else
         im = cv::imread(argv[1]);
 
@@ -48,23 +50,35 @@ int main(int argc, char *argv[])
 
     cv::Mat im_threshold = Seuil::seuil_global(amp0 * (1 / 255.0), 0.1);
 
-    HoughLine houghline(im_threshold, 200, 200);
-    houghline.compute_accumulator();
-    cv::Mat acc = houghline.get_accumulator();
-    std::cout << "Accumulator : size = " << acc.rows << "x" << acc.cols << "\n";
-    std::cout << "imthreshold : size = " << im_threshold.rows << "x" << im_threshold.cols << "\n";
+    // HoughLine houghline(im_threshold, 200, 200);
+    // houghline.compute_accumulator();
+    // cv::Mat acc = houghline.get_accumulator();
+    // std::cout << "Accumulator : size = " << acc.rows << "x" << acc.cols << "\n";
+    // std::cout << "imthreshold : size = " << im_threshold.rows << "x" << im_threshold.cols << "\n";
 
-    std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(0.0005, 5);
-    for (int i = 0; i < lines.size(); i++)
-    {
-        std::cout << "polar paramaters of line " << i << " : (" << lines[i].first << ", " << lines[i].second << ")\n";
-    }
-    cv::Mat display0 = houghline.line_display_image(lines);
-    //cv::Mat display1 = houghline.segment_display_image(lines);
+    // std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(0.0005, 5);
+    // for (int i = 0; i < lines.size(); i++)
+    // {
+    //     std::cout << "polar paramaters of line " << i << " : (" << lines[i].first << ", " << lines[i].second << ")\n";
+    // }
+    // cv::Mat display0 = houghline.line_display_image(lines);
+    // //cv::Mat display1 = houghline.segment_display_image(lines);
 
-    cv::imshow("Lines in im", display0);
-    //cv::imshow("Segments in im", display1);
-    cv::imshow("accumulator", acc*2000);
+    // cv::imshow("Lines in im", display0);
+    // //cv::imshow("Segments in im", display1);
+    // cv::imshow("accumulator", acc * 2000);
+    // cv::waitKey(0);
+
+    HoughCercle houghcercle(im_threshold, 0.f, 1000.f, 5, 5, 5);
+    houghcercle.compute_accumulator();
+    cv::imshow("accumulator", houghcercle.accumulator * 2000);
+    cv::waitKey(0);
+
+    std::vector<Cercle_parameters> cercles = houghcercle.vote_threshold_local_maxima(0.0005, 1);
+
+    cv::Mat display1 = houghcercle.cercle_display_image(cercles);
+
+    cv::imshow("cercle in im0", display1);
     cv::waitKey(0);
 
     return 0;

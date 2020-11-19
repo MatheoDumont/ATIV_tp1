@@ -73,6 +73,11 @@ configure_file(
   datas/square_sample.png ${CMAKE_CURRENT_BINARY_DIR}/datas/square_sample.png COPYONLY
 )
 configure_file(
+  datas/circle_sample_0.png ${CMAKE_CURRENT_BINARY_DIR}/datas/circle_sample_0.png COPYONLY
+)
+
+
+configure_file(
   datas/mr_piuel.jpeg ${CMAKE_CURRENT_BINARY_DIR}/datas/mr_piuel.jpeg COPYONLY
 )
 configure_file(

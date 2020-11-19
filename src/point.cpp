@@ -72,3 +72,11 @@ Point cross(const Point &p1, const Point &p2)
     p._z = (p1._x * p2._y) - (p1._y * p2._x);
     return p;
 }
+
+Point rotation2D(const Point &p1, float angle)
+{
+    Point p;
+    p._x = p1._x * cos(angle) - sin(angle) * p1._y;
+    p._y = p1._x * sin(angle) + cos(angle) * p1._y;
+    return p;
+}
