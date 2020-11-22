@@ -173,7 +173,6 @@ std::vector<Cercle_parameters> HoughCercle::vote_threshold_local_maxima(float th
 cv::Mat HoughCercle::cercle_display_image(std::vector<Cercle_parameters> cercles)
 {
     cv::Mat im = cv::Mat::zeros(rows, cols, CV_32F);
-    int step = 5;
 
     for (int i = 0; i < cercles.size(); i++)
     {
@@ -183,12 +182,53 @@ cv::Mat HoughCercle::cercle_display_image(std::vector<Cercle_parameters> cercles
         float radius = std::get<2>(cercles[i]);
         Point border(radius, 0., 0.);
 
-        for (int angle = 0; angle < 360; angle+=step)
+        float step = 1.0/radius;
+
+        for (float angle = 0; angle < 6.28; angle+=step)
         {
-            im.at<float>(std::round(x + border._x), std::round(y + border._y)) = 1.f;
-            border = rotation2D(border, angle);
+            int x_r = std::round(x + border._x);
+            int y_r = std::round(y + border._y);
+            if (x_r >= 0 && x_r < cols && y_r >= 0 && y_r < rows)
+                 im.at<float>(x_r, y_r) += 0.4;
+            border = rotation2D(border, step);
         }
     }
 
     return im;
+}
+
+cv::Mat HoughCercle::cercle_display_image_color(cv::Mat im_threshold, std::vector<Cercle_parameters> cercles)
+{
+    cv::Mat im = cv::Mat::zeros(rows, cols, CV_32FC3);
+    for (int row = 0; row < im.rows; row++)
+      {
+      for (int col = 0; col < im.cols; col++)
+        {
+            im.at<cv::Vec3f>(row,col)[0]=0.4*im_threshold.at<float>(row,col);
+        }
+      }
+    for (int i = 0; i < cercles.size(); i++)
+    {
+        // parametres du cercles avec (x, y) le centre
+        float x = std::get<0>(cercles[i]);
+        float y = std::get<1>(cercles[i]);
+        float radius = std::get<2>(cercles[i]);
+        Point border(radius, 0., 0.);
+
+        float step = 1.0/radius;
+
+        for (float angle = 0; angle < 6.28; angle+=step)
+        {
+            int x_r = std::round(x + border._x);
+            int y_r = std::round(y + border._y);
+            if (x_r >= 0 && x_r < cols && y_r >= 0 && y_r < rows)
+            {
+                im.at<cv::Vec3f>(x_r, y_r)[2] += 0.8;
+                im.at<cv::Vec3f>(x_r, y_r)[1] += 0.8;
+            }
+            border = rotation2D(border, step);
+        }
+    }
+
+    return im*255.;
 }

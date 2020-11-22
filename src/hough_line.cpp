@@ -152,13 +152,6 @@ cv::Mat HoughLine::line_display_image(std::vector<Vote_paremeters> lines)
         float xh = lines[i].second * cos(lines[i].first); // xh  = rho * cos(theta)
         float yh = lines[i].second * sin(lines[i].first); // yh  = rho * sin(theta)
         float line_direction_0 = lines[i].first + M_PI_2;
-        /*
-        //critère 1
-        if (line_direction_0 > M_PI)
-            line_direction_0 -= 2*M_PI; // to have it in [-pi, pi] to compare to atan2
-        float line_direction_1 = lines[i].first-M_PI_2;// should be in [-pi, pi] since theta in [-pi/2,pi]
-        */
-
         //critère2
         float tandir = tan(lines[i].first + M_PI_2);
         float invtandir = 1. / tandir;
@@ -170,12 +163,6 @@ cv::Mat HoughLine::line_display_image(std::vector<Vote_paremeters> lines)
                 float y = row - yh;
                 float x = col - xh;
 
-                /*
-                // critère 1
-                if (abs(std::atan2(y,x) - line_direction_0) < epsilon_rad || abs(std::atan2(y,x) - line_direction_1) < epsilon_rad )
-                    img.at<float>(row, col) += 0.3;
-                */
-
                 // critère 2
                 if (abs(y - x * tandir) < epsilon_pix || abs(x - y * invtandir) < epsilon_pix)
                     img.at<float>(row, col) += 0.2;
@@ -183,6 +170,44 @@ cv::Mat HoughLine::line_display_image(std::vector<Vote_paremeters> lines)
         }
     }
     return img;
+}
+
+cv::Mat HoughLine::line_display_image_color(std::vector<Vote_paremeters> lines)
+{
+    float epsilon_rad = d_theta * 0.5; // in radian
+    float epsilon_pix = 1.0;            // in pixel
+    cv::Mat img = cv::Mat::zeros(rows, cols, CV_32FC3);
+    for (int i = 0; i < contours.size(); i++)
+    {
+        img.at<cv::Vec3f>(contours[i]._y, contours[i]._x)[0] = 0.4;
+    }
+
+    for (int i = 0; i < lines.size(); i++)
+    {
+        float xh = lines[i].second * cos(lines[i].first); // xh  = rho * cos(theta)
+        float yh = lines[i].second * sin(lines[i].first); // yh  = rho * sin(theta)
+        float line_direction_0 = lines[i].first + M_PI_2;
+        //critère2
+        float tandir = tan(lines[i].first + M_PI_2);
+        float invtandir = 1. / tandir;
+
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                float y = row - yh;
+                float x = col - xh;
+
+                // critère 2
+                if (abs(y - x * tandir) < epsilon_pix || abs(x - y * invtandir) < epsilon_pix)
+                {
+                    img.at<cv::Vec3f>(row, col)[2] += 0.8;
+                    img.at<cv::Vec3f>(row, col)[1] += 0.8;
+                }
+            }
+        }
+    }
+    return img*255.;
 }
 
 cv::Mat HoughLine::segment_display_image(std::vector<Vote_paremeters> lines)

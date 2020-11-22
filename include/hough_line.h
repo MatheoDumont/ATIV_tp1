@@ -148,6 +148,8 @@ public:
     //=================
     /* In order to display the lines we found */
     cv::Mat line_display_image(std::vector<Vote_paremeters> lines);
+    cv::Mat line_display_image_color(std::vector<Vote_paremeters> lines);
+
     cv::Mat segment_display_image(std::vector<Vote_paremeters> lines);
 };
 #endif

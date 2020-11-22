@@ -35,6 +35,7 @@ public:
     void compute_accumulator();
     std::vector<Cercle_parameters> vote_threshold_local_maxima(float threshold, int radius);
     cv::Mat cercle_display_image(std::vector<Cercle_parameters> cercles);
+    cv::Mat cercle_display_image_color(cv::Mat im_threshold, std::vector<Cercle_parameters> cercles);
 };
 
 #endif

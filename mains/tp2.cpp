@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     cv::Mat greyscale_image;
     cv::Mat im;
     if (argc < 2)
-        im = cv::imread(IMAGE_NAME7);
+        im = cv::imread(IMAGE_NAME6);
     else
         im = cv::imread(argv[1]);
 
@@ -51,29 +51,35 @@ int main(int argc, char *argv[])
     dir = Kernel::angle(gradient_convol);
 
     cv::Mat im_threshold = Seuil::seuil_global(amp0 * (1 / 255.0), 0.1);
-    //cv::imshow("im thresh", im_threshold);
-    //cv::waitKey(0);
 
-    // HoughLine houghline(im_threshold, 200, 200);
-    // houghline.compute_accumulator();
-    // cv::Mat acc = houghline.get_accumulator();
-    // std::cout << "Accumulator : size = " << acc.rows << "x" << acc.cols << "\n";
-    // std::cout << "imthreshold : size = " << im_threshold.rows << "x" << im_threshold.cols << "\n";
+    HoughLine houghline(im_threshold, 200, 200);
+    houghline.compute_accumulator();
+    cv::Mat acc = houghline.get_accumulator();
+    std::cout << "Accumulator : size = " << acc.rows << "x" << acc.cols << "\n";
+    std::cout << "imthreshold : size = " << im_threshold.rows << "x" << im_threshold.cols << "\n";
 
-    // std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(0.0005, 5);
-    // for (int i = 0; i < lines.size(); i++)
-    // {
-    //     std::cout << "polar paramaters of line " << i << " : (" << lines[i].first << ", " << lines[i].second << ")\n";
-    // }
-    // cv::Mat display0 = houghline.line_display_image(lines);
-    // //cv::Mat display1 = houghline.segment_display_image(lines);
+    std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(0.0006, 6);
+    for (int i = 0; i < lines.size(); i++)
+    {
+        std::cout << "polar paramaters of line " << i << " : (" << lines[i].first << ", " << lines[i].second << ")\n";
+    }
+    cv::Mat display0 = houghline.line_display_image_color(lines);
+    //cv::Mat display1 = houghline.segment_display_image(lines);
 
-    // cv::imshow("Lines in im", display0);
-    // //cv::imshow("Segments in im", display1);
-    // cv::imshow("accumulator", acc * 2000);
-    // cv::waitKey(0);
+    cv::imshow("Lines in im", display0);
+    //cv::imshow("Segments in im", display1);
+    cv::imshow("accumulator", acc * 2000.);
+    cv::imshow("im thresh", im_threshold);
 
-    HoughCercle houghcercle(im_threshold, 10.f, 25.f, 50, 50, 15);
+    cv::imwrite("output_lines.jpg", display0* 255.);
+    cv::imwrite("im_contour_line.jpg", im_threshold* 255.);
+    cv::imwrite("accumulator.jpg", acc*2000.* 255.);
+    cv::waitKey(0);
+
+
+    /* cercle
+    {
+    HoughCercle houghcercle(im_threshold, 5.f, 40.f, 50, 50, 35);
     houghcercle.compute_accumulator();
     //cv::imshow("accumulator", houghcercle.accumulator * 2000); impossible to visalize the accumulator haha
     //cv::waitKey(0);
@@ -90,16 +96,21 @@ int main(int argc, char *argv[])
     //     }
     // }
 
-    std::vector<Cercle_parameters> cercles = houghcercle.vote_threshold_local_maxima(0.00005, 1);
-    std::cout << "cercles.size() : " << cercles.size() << "\n";
-    for (int i = 0; i < cercles.size(); i++)
-    {
-        std::cout << "Cercle paramaters " << i << " : (" << std::get<0>(cercles[i]) << ", " << std::get<1>(cercles[i]) << ", " << std::get<2>(cercles[i]) << ")\n";
-    }
+        std::vector<Cercle_parameters> cercles = houghcercle.vote_threshold_local_maxima(0.00008, 4);
+        std::cout << "cercles.size() : " << cercles.size() << "\n";
+        for (int i = 0; i < cercles.size(); i++)
+        {
+            std::cout << "Cercle paramaters " << i << " : (" << std::get<0>(cercles[i]) << ", " << std::get<1>(cercles[i]) << ", " << std::get<2>(cercles[i]) << ")\n";
+        }
 
-    cv::Mat display1 = houghcercle.cercle_display_image(cercles);
-    cv::imshow("cercle in im0", display1);
-    cv::waitKey(0);
+        //cv::Mat display1 = houghcercle.cercle_display_image(cercles);
+        cv::Mat display1 = houghcercle.cercle_display_image_color(im_threshold, cercles);
+        cv::imshow("cercle in im0", display1);
+        cv::imshow("im thresh", im_threshold);
 
+        cv::imwrite("output_cercles.jpg", display1* 255.);
+        cv::imwrite("im_contour.jpg", im_threshold* 255.);
+        cv::waitKey(0);
+    }*/
     return 0;
 }
