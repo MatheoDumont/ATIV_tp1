@@ -34,11 +34,32 @@ int main(int argc, char *argv[])
 
     cv::Mat greyscale_image;
     cv::Mat im;
-    if (argc < 2)
-        im = cv::imread(IMAGE_NAME6);
+    std::string im_name = IMAGE_NAME6;
+    bool line_detect = true; bool cercle_detect = false;
+    if (argc > 1)
+    {
+        im_name = std::string(argv[1]);
+        for (int i = 2 ; i < argc ; i++)
+        {
+            if (std::string(argv[i]) == "-lc")
+                cercle_detect = true;
+            else if (std::string(argv[i]) == "-c")
+            {
+                cercle_detect = true;
+                line_detect = false;
+            }
+        }
+    }
     else
-        im = cv::imread(argv[1]);
+    {
+        std::cout << "------------------\n usage :    ./TP2 image_name -lc -c\n";
+        std::cout << "-lc : for line+cercle detection\n";
+        std::cout << "-c : for cercle only detection\n";
+        std::cout << "by default, use line detection only\n-------------------\n";
+    }
 
+    std::cout << "image used : " << im_name << "\n";
+    im = cv::imread(im_name.c_str());
     cv::cvtColor(im, greyscale_image, cv::COLOR_BGR2GRAY);
     greyscale_image.convertTo(greyscale_image, CV_32F);
 
@@ -52,51 +73,55 @@ int main(int argc, char *argv[])
 
     cv::Mat im_threshold = Seuil::seuil_global(amp0 * (1 / 255.0), 0.1);
 
-    HoughLine houghline(im_threshold, 200, 200);
-    houghline.compute_accumulator();
-    cv::Mat acc = houghline.get_accumulator();
-    std::cout << "Accumulator : size = " << acc.rows << "x" << acc.cols << "\n";
-    std::cout << "imthreshold : size = " << im_threshold.rows << "x" << im_threshold.cols << "\n";
 
-    std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(0.0006, 6);
-    for (int i = 0; i < lines.size(); i++)
+    if (line_detect)
     {
-        std::cout << "polar paramaters of line " << i << " : (" << lines[i].first << ", " << lines[i].second << ")\n";
+        std::cout << "LINE DETECTION\n-------------\n";
+        HoughLine houghline(im_threshold, 200, 200);
+        houghline.compute_accumulator();
+        cv::Mat acc = houghline.get_accumulator();
+        std::cout << "Accumulator : size = " << acc.rows << "x" << acc.cols << "\n";
+        std::cout << "imthreshold : size = " << im_threshold.rows << "x" << im_threshold.cols << "\n";
+
+        std::vector<Line_paremeters> lines = houghline.vote_threshold_local_maxima(0.0006, 8);
+        for (int i = 0; i < lines.size(); i++)
+        {
+            std::cout << "polar paramaters of line " << i << " : (" << lines[i].first << ", " << lines[i].second << ")\n";
+        }
+        cv::Mat display0 = houghline.line_display_image_color(lines);
+        cv::Mat display1 = houghline.segment_display_image(lines);
+
+        cv::imshow("Lines in im", display0);
+        cv::imshow("Segments in im", display1);
+        cv::imshow("accumulator", acc * 2000.);
+        cv::imshow("im thresh", im_threshold);
+
+        cv::imwrite("output_lines.jpg", display0* 255.);
+        cv::imwrite("im_contour_line.jpg", im_threshold* 255.);
+        cv::imwrite("accumulator.jpg", acc*2000.* 255.);
+        cv::waitKey(0);
     }
-    cv::Mat display0 = houghline.line_display_image_color(lines);
-    //cv::Mat display1 = houghline.segment_display_image(lines);
 
-    cv::imshow("Lines in im", display0);
-    //cv::imshow("Segments in im", display1);
-    cv::imshow("accumulator", acc * 2000.);
-    cv::imshow("im thresh", im_threshold);
-
-    cv::imwrite("output_lines.jpg", display0* 255.);
-    cv::imwrite("im_contour_line.jpg", im_threshold* 255.);
-    cv::imwrite("accumulator.jpg", acc*2000.* 255.);
-    cv::waitKey(0);
-
-
-    /* cercle
+    if (cercle_detect)
     {
-    HoughCercle houghcercle(im_threshold, 5.f, 40.f, 50, 50, 35);
-    houghcercle.compute_accumulator();
-    //cv::imshow("accumulator", houghcercle.accumulator * 2000); impossible to visalize the accumulator haha
-    //cv::waitKey(0);
-    std::cout << "accumulator size : "<< houghcercle.accumulator.size[0] << "x"<< houghcercle.accumulator.size[1] << "x"<< houghcercle.accumulator.size[2]<< "\n";
-    std::cout << "accumulator size : "<< houghcercle.accumulator.size << "\n";
-    // for (int ix = 0; ix < houghcercle.accumulator.size[0] - 0; ix++)
-    // {
-    //     for (int iy = 0; iy < houghcercle.accumulator.size[1] - 0; iy++)
-    //     {
-    //         for (int ir = 0; ir < houghcercle.accumulator.size[2] - 0; ir++)
-    //         {
-    //             std::cout << houghcercle.accumulator.at<float>(ix,iy,ir) << "\t";
-    //         }
-    //     }
-    // }
+        std::cout << "CERCLE DETECTION\n-------------\n";
+        HoughCercle houghcercle(im_threshold, 5.f, 0.85*std::min(im_threshold.cols,im_threshold.rows), 50, 50, 35);
+        houghcercle.compute_accumulator();
+        //cv::imshow("accumulator", houghcercle.accumulator * 2000); impossible to visalize the accumulator haha
+        //cv::waitKey(0);
+        std::cout << "accumulator size : "<< houghcercle.accumulator.size << "\n";
+        // for (int ix = 0; ix < houghcercle.accumulator.size[0] - 0; ix++)
+        // {
+        //     for (int iy = 0; iy < houghcercle.accumulator.size[1] - 0; iy++)
+        //     {
+        //         for (int ir = 0; ir < houghcercle.accumulator.size[2] - 0; ir++)
+        //         {
+        //             std::cout << houghcercle.accumulator.at<float>(ix,iy,ir) << "\t";
+        //         }
+        //     }
+        // }
 
-        std::vector<Cercle_parameters> cercles = houghcercle.vote_threshold_local_maxima(0.00008, 4);
+        std::vector<Cercle_parameters> cercles = houghcercle.vote_threshold_local_maxima(0.00008, 5);
         std::cout << "cercles.size() : " << cercles.size() << "\n";
         for (int i = 0; i < cercles.size(); i++)
         {
@@ -111,6 +136,6 @@ int main(int argc, char *argv[])
         cv::imwrite("output_cercles.jpg", display1* 255.);
         cv::imwrite("im_contour.jpg", im_threshold* 255.);
         cv::waitKey(0);
-    }*/
+    }
     return 0;
 }

@@ -3,6 +3,7 @@
  * Description :
  */
 #include "hough_line.h"
+#include "contour.h"
 
 HoughLine::HoughLine(cv::Mat im_threshold, int _n_theta, int _n_rho)
     : n_theta(_n_theta), n_rho(_n_rho)
@@ -213,13 +214,17 @@ cv::Mat HoughLine::line_display_image_color(std::vector<Vote_paremeters> lines)
 cv::Mat HoughLine::segment_display_image(std::vector<Vote_paremeters> lines)
 {// doesn't really work...
     float epsilon_rad = d_theta * 0.5; // in radian
-    float epsilon_pix = 0.7;            // in pixel
-    cv::Mat img = cv::Mat::zeros(rows, cols, CV_32F);
+    float epsilon_pix = 1.0;            // in pixel
+    int pixel_segment_tolerance = 5;
+    cv::Mat img = cv::Mat::zeros(rows, cols, CV_32FC3);
     for (int i = 0; i < contours.size(); i++)
     {
-        img.at<float>(contours[i]._y, contours[i]._x) = 0.0;
+        img.at<cv::Vec3f>(contours[i]._y, contours[i]._x)[0] = 0.4;
     }
-
+    // std::vector<std::pair<int, int>> mask1{
+    //     {2, -1}, {2, 0}, {2, 1}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}, {0, -2}, {0, -1}, {0, 0}, {0, 1}, {0, 2}, {-1, -2}, {-1, -1}, {-1, 0}, {-1, 1}, {-1, 2}, {-2, -1}, {-2, 0}, {-2, 1}};
+    //
+    // cv::Mat contours_dilated = Contour::dilatation(_im_threshold, mask1, true);
 
     for (int i = 0; i < lines.size(); i++)
     {
@@ -237,24 +242,24 @@ cv::Mat HoughLine::segment_display_image(std::vector<Vote_paremeters> lines)
         float row_end = rows-1, col_end = cols-1;
         int j = 0;
         while (j < contours.size() &&
-               !critere(contours[j] - h, epsilon_pix, tandir, invtandir))
+               !critere(contours[j] - h, pixel_segment_tolerance*epsilon_pix, tandir, invtandir))
         {j++;} // find first point of the line in the contour
         if (j < contours.size())
         { row_beg = contours[j]._y; col_beg = contours[j]._x; }
 
         j = contours.size()-1;
         while (j >= 0 &&
-               !critere(contours[j] - h, epsilon_pix, tandir, invtandir))
+               !critere(contours[j] - h, pixel_segment_tolerance*epsilon_pix, tandir, invtandir))
         {j--;} // find last point of the line in the contour
         if (j >= 0)
         { row_end = contours[j]._y; col_end = contours[j]._x;}
 
         //std::cout << i <<" : DEBEND : " << row_beg << " " << row_end << " " << col_beg << " " << col_end << "\n";
 
-        int row_init = std::max((int)std::min(row_beg, row_end)-1,0);
-        int col_init = std::max((int)std::min(col_beg, col_end)-1,0);
-        int row_fina = std::min((int)std::max(row_beg, row_end)+1,rows-1);
-        int col_fina = std::min((int)std::max(col_beg, col_end)+1,cols-1);
+        int row_init = std::max((int)std::min(row_beg, row_end)-pixel_segment_tolerance,0);
+        int col_init = std::max((int)std::min(col_beg, col_end)-pixel_segment_tolerance,0);
+        int row_fina = std::min((int)std::max(row_beg, row_end)+pixel_segment_tolerance,rows-1);
+        int col_fina = std::min((int)std::max(col_beg, col_end)+pixel_segment_tolerance,cols-1);
         //std::cout << "  : INIFIN : " << row_init << " " << row_fina << " " << col_init << " " << col_fina << "\n";
 
         // begin images loop in rectangle {row_beg,row_end,col_beg,col_end}
@@ -265,7 +270,10 @@ cv::Mat HoughLine::segment_display_image(std::vector<Vote_paremeters> lines)
                 Point u = Point(1.0*col, 1.0*row, 0.0) - h;
                 // critère
                 if (critere(u, epsilon_pix, tandir, invtandir))
-                    img.at<float>(row, col) += 0.5;
+                {
+                    img.at<cv::Vec3f>(row, col)[2] += 0.8;
+                    img.at<cv::Vec3f>(row, col)[1] += 0.8;
+                }
             }
         }
     }
